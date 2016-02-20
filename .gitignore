@@ -1,0 +1,7 @@
+/visualstudio/.vs
+/visualstudio/x64
+/visualstudio/*.opensdf
+/visualstudio/*.sdf
+/visualstudio/*.psess
+/visualstudio/*.vspx
+/visualstudio/*.opendb
