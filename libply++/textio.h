@@ -252,7 +252,13 @@ namespace textio
 		auto eot = begin;
 		while (eot != end)
 		{
+			// Skip all delimiters.
+			while (begin != end && *begin == m_delimiter)
+			{
+				++begin;
+			}
 			eot = textio::find(begin, end, m_delimiter);
+
 			tokens.emplace_back(begin, eot);
 			if (eot != end)
 			{
