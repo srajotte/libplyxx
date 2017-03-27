@@ -87,19 +87,17 @@ void TriangleInserter::insert()
 	m_triangles.emplace_back(std::move(Mesh::TriangleIndices{ v0.value(), v1.value(), v2.value() }));
 }
 
-int main()
+void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles)
 {
-	libply::File file(L"../test/data/test.ply");
+	libply::File file(filename);
 
 	const auto& definitions = file.definitions();
 
-	Mesh::VertexList vertices;
 	const auto vertexDefinition = definitions.at(0);
 	const size_t vertexCount = vertexDefinition.size;
 	vertices.reserve(vertexCount);
 	VertexInserter vertexInserter(vertices);
 
-	Mesh::TriangleIndicesList triangles;
 	const auto triangleDefinition = definitions.at(1);
 	const size_t triangleCount = triangleDefinition.size;
 	triangles.reserve(triangleCount);
@@ -107,9 +105,20 @@ int main()
 
 	libply::InserterMap inserters =
 	{
-		{"vertex" , &vertexInserter},
-		{"face" , &triangleInserter}
+		{ "vertex" , &vertexInserter },
+		{ "face" , &triangleInserter }
 	};
 
 	file.readElements(inserters);
+}
+
+int main()
+{
+	Mesh::VertexList ascii_vertices;
+	Mesh::TriangleIndicesList ascii_triangles;
+	readply(L"../test/data/test.ply", ascii_vertices, ascii_triangles);
+
+	Mesh::VertexList bin_vertices;
+	Mesh::TriangleIndicesList bin_triangles;
+	readply(L"../test/data/test_bin.ply", bin_vertices, bin_triangles);
 }

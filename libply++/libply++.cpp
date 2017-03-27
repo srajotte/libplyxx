@@ -31,7 +31,7 @@ void addProperty(const textio::Tokenizer::TokenList& tokens, ElementDefinition& 
 	auto& properties = elementDefinition.properties;
 	if (std::string(tokens.at(1)) == "list")
 	{
-		properties.emplace_back(tokens.back(), TYPE_MAP.at(tokens.at(3)), true);
+		properties.emplace_back(tokens.back(), TYPE_MAP.at(tokens.at(3)), true, TYPE_MAP.at(tokens.at(2)));
 	}
 	else
 	{
@@ -183,19 +183,20 @@ void File::readBinaryElement(std::ifstream& fs, const ElementDefinition& element
 			auto i = kv.first;
 			const auto size = TYPE_SIZE_MAP.at(properties[i].type);
 			fs.read(buffer, size);
-			auto tmp = fs.gcount();
 			properties[i].castFunction(buffer, *kv.second);
 		}
 	}
 	else
 	{
+		const auto lengthType = properties[0].listLengthType;
+		const auto lengthTypeSize = TYPE_SIZE_MAP.at(lengthType);
+		fs.read(buffer, lengthTypeSize);
+
 		const auto& castFunction = properties[0].castFunction;
 		const auto size = TYPE_SIZE_MAP.at(properties[0].type);
 		for (auto& kv : pm)
 		{
-			auto i = kv.first + 1;
 			fs.read(buffer, size);
-			auto tmp = fs.gcount();
 			castFunction(buffer, *kv.second);
 		}
 	}

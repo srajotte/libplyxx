@@ -154,8 +154,8 @@ namespace libply
 
 	struct PropertyDefinition
 	{
-		PropertyDefinition(const std::string& name, Type type, bool isList)
-			: name(name), type(type), isList(isList), 
+		PropertyDefinition(const std::string& name, Type type, bool isList, Type listLengthType = Type::UCHAR)
+			: name(name), type(type), isList(isList), listLengthType(listLengthType),
 			  conversionFunction(CONVERSION_MAP.at(type)), 
 			  castFunction(CAST_MAP.at(type))
 			  {};
@@ -163,6 +163,7 @@ namespace libply
 		std::string name;
 		Type type;
 		bool isList;
+		Type listLengthType;
 		ConversionFunction conversionFunction;
 		CastFunction castFunction;
 	};
