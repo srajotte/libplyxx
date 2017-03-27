@@ -1,8 +1,17 @@
+#include <iostream>
+
 #include "../libply++/libply++.h"
+
+bool areClose(double a, double b)
+{
+	const double EPSILON = 1.0e-1;
+	return abs(a - b) < EPSILON;
+}
 
 struct Vertex
 {
 	Vertex(double x, double y, double z) : x(x), y(y), z(z) {};
+	bool operator==(const Vertex& other) const { return areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z); };
 	double x, y, z;
 };
 
@@ -112,6 +121,24 @@ void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIn
 	file.readElements(inserters);
 }
 
+bool compare_vertices(const Mesh::VertexList& left, const Mesh::VertexList& right)
+{
+	if (left.size() != right.size())
+	{
+		std::cout << "Length mismatch" << std::endl;
+		return false;
+	}
+
+	for (unsigned int i = 0; i < left.size(); ++i)
+	{
+		if (!(left[i] == right[i]))
+		{
+			std::cout << "vertex " << i << " are different" << std::endl;
+		}
+	}
+	return true;
+}
+
 int main()
 {
 	Mesh::VertexList ascii_vertices;
@@ -121,4 +148,6 @@ int main()
 	Mesh::VertexList bin_vertices;
 	Mesh::TriangleIndicesList bin_triangles;
 	readply(L"../test/data/test_bin.ply", bin_vertices, bin_triangles);
+
+	compare_vertices(ascii_vertices, bin_vertices);
 }
