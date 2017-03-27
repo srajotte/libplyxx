@@ -129,14 +129,36 @@ bool compare_vertices(const Mesh::VertexList& left, const Mesh::VertexList& righ
 		return false;
 	}
 
+	int errors = 0;
 	for (unsigned int i = 0; i < left.size(); ++i)
 	{
 		if (!(left[i] == right[i]))
 		{
-			std::cout << "vertex " << i << " are different" << std::endl;
+			std::cout << "vertex " << i << " is different" << std::endl;
+			++errors;
 		}
 	}
-	return true;
+	return errors == 0;
+}
+
+bool compare_triangles(const Mesh::TriangleIndicesList& left, const Mesh::TriangleIndicesList& right)
+{
+	if (left.size() != right.size())
+	{
+		std::cout << "Length mismatch" << std::endl;
+		return false;
+	}
+
+	int errors = 0;
+	for (unsigned int i = 0; i < left.size(); ++i)
+	{
+		if (!(left[i] == right[i]))
+		{
+			std::cout << "triangle " << i << " is different" << std::endl;
+			++errors;
+		}
+	}
+	return errors == 0;
 }
 
 int main()
@@ -150,4 +172,5 @@ int main()
 	readply(L"../test/data/test_bin.ply", bin_vertices, bin_triangles);
 
 	compare_vertices(ascii_vertices, bin_vertices);
+	compare_triangles(ascii_triangles, bin_triangles);
 }
