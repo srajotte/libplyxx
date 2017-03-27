@@ -49,9 +49,11 @@ namespace textio
 		inline LineReader(const std::wstring& filename, bool textMode = false);
 
 		// Read next line from input file.
-		// Returned SubString is valid until the next call to getline() or getlineString().
+		// Returned SubString is valid until the next call to getline()
 		inline SubString getline();
 		inline bool eof() const { return m_eof; };
+		inline std::ifstream& filestream() { return m_file; };
+		inline std::streamsize position(const std::string::const_iterator& workbuf_iter);
 
 	private:
 		//inline void readFileChunk(std::streamoff offset = 0);
@@ -65,6 +67,7 @@ namespace textio
 		std::ifstream m_file;
 
 		std::streamsize m_workBufSize;
+		std::streamsize m_workBufFileEndPosition;
 		WorkBuffer m_workBuf;
 		bool m_eof;
 
@@ -269,7 +272,7 @@ namespace textio
 	}
 
 	LineReader::LineReader(const std::wstring& filename, bool textMode)
-		: m_workBufSize(1 * 1024 * 1024), m_eof(false)
+		: m_workBufSize(1 * 1024 * 1024), m_eof(false), m_workBufFileEndPosition(0)
 	{
 		int mode = std::fstream::in;
 		if (!textMode) { mode |= std::fstream::binary; }
@@ -298,6 +301,7 @@ namespace textio
 		m_file.read(bufferFront + overlap, m_workBufSize - overlap);
 		m_begin = m_workBuf.cbegin();
 		m_end = m_workBuf.cbegin() + overlap + m_file.gcount();
+		m_workBufFileEndPosition += m_file.gcount();
 		return m_file.gcount();
 	}
 
@@ -331,5 +335,10 @@ namespace textio
 			m_begin = eol + 1;
 		}
 		return lineSubstring;
+	}
+
+	std::streamsize LineReader::position(const std::string::const_iterator& workbuf_iter)
+	{
+		return m_workBufFileEndPosition - (m_end - workbuf_iter);
 	}
 }

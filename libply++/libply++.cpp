@@ -50,13 +50,27 @@ void File::readHeader()
 
 	// Read file format.
 	line = m_lineReader.getline();
-	if (line != "format ascii 1.0")
+	if (line == "format ascii 1.0")
+	{
+		m_format = Format::ASCII;
+	}
+	else if (line == "format binary_little_endian 1.0")
+	{
+		m_format = Format::BINARY_LITTLE_ENDIAN;
+	}
+	else if (line == "format binary_big_endian 1.0")
+	{
+		m_format = Format::BINARY_BIG_ENDIAN;
+	}
+	else
 	{
 		throw std::runtime_error("Unsupported PLY format : " + line);
 	}
 
 	// Read mesh elements properties.
-	line = m_lineReader.getline();
+	textio::SubString line_substring;
+	line_substring = m_lineReader.getline();
+	line = line_substring;
 	textio::Tokenizer spaceTokenizer(' ');
 	auto tokens = spaceTokenizer.tokenize(line);
 	size_t startLine = 0;
@@ -76,9 +90,12 @@ void File::readHeader()
 			//throw std::runtime_error("Invalid header line.");
 		}
 
-		line = m_lineReader.getline();
+		line_substring = m_lineReader.getline();
+		line = line_substring;
 		tokens = spaceTokenizer.tokenize(line);
 	}
+	
+	m_dataOffset = m_lineReader.position(line_substring.end()) + 1;
 }
 
 const void File::readElements(const InserterMap& im)
@@ -95,11 +112,17 @@ const void File::readElements(const InserterMap& im)
 	PropertyMap properties = elementInserter->properties();
 	auto& elementDefinition = m_elements.at(elementIndex);
 	const std::size_t maxElementIndex = m_elements.size();
+	
+	std::ifstream& filestream = m_lineReader.filestream();
+
+	if (m_format == Format::BINARY_BIG_ENDIAN || m_format == Format::BINARY_LITTLE_ENDIAN)
+	{
+		filestream.clear();
+		filestream.seekg(m_dataOffset);
+	}
 
 	while (lineIndex < totalLines)
 	{
-		auto line = m_lineReader.getline();
-
 		const auto nextElementIndex = elementIndex + 1;
 		if (nextElementIndex < maxElementIndex && lineIndex >= m_elements[nextElementIndex].startLine)
 		{
@@ -109,7 +132,15 @@ const void File::readElements(const InserterMap& im)
 			properties = elementInserter->properties();
 		}
 
-		parseLine(line, elementDefinition, properties);
+		if (m_format == Format::ASCII)
+		{
+			auto line = m_lineReader.getline();
+			parseLine(line, elementDefinition, properties);
+		}
+		else {
+			readBinaryElement(filestream, elementDefinition, properties);
+		}
+		
 		elementInserter->insert();
 		++lineIndex;
 	}
@@ -135,6 +166,37 @@ void File::parseLine(const textio::SubString& line, const ElementDefinition& ele
 		{
 			auto i = kv.first + 1;
 			conversionFunction(m_tokens[i], *kv.second);
+		}
+	}
+}
+
+void File::readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& pm)
+{
+	const auto& properties = elementDefinition.properties;
+	const unsigned int MAX_PROPERTY_SIZE = 8;
+	char buffer[MAX_PROPERTY_SIZE];
+
+	if (!properties.front().isList)
+	{
+		for (auto& kv : pm)
+		{
+			auto i = kv.first;
+			const auto size = TYPE_SIZE_MAP.at(properties[i].type);
+			fs.read(buffer, size);
+			auto tmp = fs.gcount();
+			properties[i].castFunction(buffer, *kv.second);
+		}
+	}
+	else
+	{
+		const auto& castFunction = properties[0].castFunction;
+		const auto size = TYPE_SIZE_MAP.at(properties[0].type);
+		for (auto& kv : pm)
+		{
+			auto i = kv.first + 1;
+			fs.read(buffer, size);
+			auto tmp = fs.gcount();
+			castFunction(buffer, *kv.second);
 		}
 	}
 }

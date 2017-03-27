@@ -41,6 +41,14 @@ namespace libply
 		{ "float", Type::FLOAT },
 		{ "double", Type::DOUBLE },
 	};
+	typedef std::unordered_map<Type, unsigned int> TypeSizeMap;
+	const TypeSizeMap TYPE_SIZE_MAP =
+	{
+		{ Type::UCHAR, 1 },
+		{ Type::INT, 4 },
+		{ Type::FLOAT, 4 },
+		{ Type::DOUBLE, 8 },
+	};
 
 	class IProperty
 	{
@@ -113,15 +121,50 @@ namespace libply
 		{ Type::DOUBLE, convert_DOUBLE }
 	};
 
+	inline void cast_UCHAR(char* buffer, IProperty& property)
+	{
+		property = *reinterpret_cast<unsigned char*>(buffer);
+	}
+
+	inline void cast_INT(char* buffer, IProperty& property)
+	{
+		property = *reinterpret_cast<int*>(buffer);
+	}
+
+	inline void cast_FLOAT(char* buffer, IProperty& property)
+	{
+		property = *reinterpret_cast<float*>(buffer);
+	}
+
+	inline void cast_DOUBLE(char* buffer, IProperty& property)
+	{
+		property = *reinterpret_cast<double*>(buffer);
+	}
+
+	typedef void(*CastFunction)(char* buffer, IProperty&);
+	typedef std::unordered_map<Type, CastFunction> CastFunctionMap;
+
+	const CastFunctionMap CAST_MAP =
+	{
+		{ Type::UCHAR , cast_UCHAR },
+		{ Type::INT, cast_INT },
+		{ Type::FLOAT, cast_FLOAT },
+		{ Type::DOUBLE, cast_DOUBLE }
+	};
+
 	struct PropertyDefinition
 	{
 		PropertyDefinition(const std::string& name, Type type, bool isList)
-			: name(name), type(type), isList(isList), conversionFunction(CONVERSION_MAP.at(type)) {};
+			: name(name), type(type), isList(isList), 
+			  conversionFunction(CONVERSION_MAP.at(type)), 
+			  castFunction(CAST_MAP.at(type))
+			  {};
 
 		std::string name;
 		Type type;
 		bool isList;
 		ConversionFunction conversionFunction;
+		CastFunction castFunction;
 	};
 
 	struct ElementDefinition
@@ -147,8 +190,19 @@ namespace libply
 	private:
 		void readHeader();
 		void parseLine(const textio::SubString& substr, const ElementDefinition& elementDefinition, const PropertyMap& am);
+		void readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& am);
 
+	private:
+		enum class Format
+		{
+			ASCII,
+			BINARY_LITTLE_ENDIAN,
+			BINARY_BIG_ENDIAN
+		};
+	private:
 		std::wstring m_filename;
+		File::Format m_format;
+		std::streamsize m_dataOffset;
 		textio::LineReader m_lineReader;
 		textio::Tokenizer m_lineTokenizer;
 		textio::Tokenizer::TokenList m_tokens;
