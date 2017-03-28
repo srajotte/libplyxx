@@ -171,7 +171,8 @@ namespace libply
 		File(const std::wstring& filename);
 
 		const std::vector<ElementDefinition>& definitions() const { return m_elements;} ;
-		const void readElements(const InserterMap& im);
+		void setElementInserter(std::string elementName, IElementInserter* inserter);
+		const void read();
 
 	private:
 		void readHeader();
@@ -193,5 +194,6 @@ namespace libply
 		textio::Tokenizer m_lineTokenizer;
 		textio::Tokenizer::TokenList m_tokens;
 		std::vector<ElementDefinition> m_elements;
+		InserterMap m_inserterMap;
 	};
 }

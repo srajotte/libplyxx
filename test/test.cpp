@@ -118,7 +118,9 @@ void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIn
 		{ "face" , &triangleInserter }
 	};
 
-	file.readElements(inserters);
+	file.setElementInserter("vertex", &vertexInserter);
+	file.setElementInserter("face", &triangleInserter);
+	file.read();
 }
 
 bool compare_vertices(const Mesh::VertexList& left, const Mesh::VertexList& right)

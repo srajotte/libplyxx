@@ -98,7 +98,12 @@ void File::readHeader()
 	m_dataOffset = m_lineReader.position(line_substring.end()) + 1;
 }
 
-const void File::readElements(const InserterMap& im)
+void File::setElementInserter(std::string elementName, IElementInserter* inserter)
+{
+	m_inserterMap[elementName] = inserter;
+}
+
+const void File::read()
 {
 	std::size_t totalLines = 0;
 	for (auto& e : m_elements)
@@ -108,7 +113,7 @@ const void File::readElements(const InserterMap& im)
 
 	std::size_t lineIndex = 0;
 	std::size_t elementIndex = 0;
-	IElementInserter* elementInserter = im.at(m_elements.at(elementIndex).name);
+	IElementInserter* elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
 	PropertyMap properties = elementInserter->properties();
 	auto& elementDefinition = m_elements.at(elementIndex);
 	const std::size_t maxElementIndex = m_elements.size();
@@ -127,7 +132,7 @@ const void File::readElements(const InserterMap& im)
 		if (nextElementIndex < maxElementIndex && lineIndex >= m_elements[nextElementIndex].startLine)
 		{
 			elementIndex = nextElementIndex;
-			elementInserter = im.at(m_elements.at(elementIndex).name);
+			elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
 			elementDefinition = m_elements.at(elementIndex);
 			properties = elementInserter->properties();
 		}
