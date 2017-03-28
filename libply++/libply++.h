@@ -11,8 +11,6 @@
 
 namespace libply
 {
-	typedef std::size_t ElementSize;
-
 	enum class Type
 	{
 		//CHAR,
@@ -31,23 +29,6 @@ namespace libply
 		//UINT32,
 		//FLOAT32,
 		//FLOAT64
-	};
-
-	typedef std::unordered_map<std::string, Type> TypeMap;
-	const TypeMap TYPE_MAP =
-	{
-		{ "uchar", Type::UCHAR },
-		{ "int", Type::INT },
-		{ "float", Type::FLOAT },
-		{ "double", Type::DOUBLE },
-	};
-	typedef std::unordered_map<Type, unsigned int> TypeSizeMap;
-	const TypeSizeMap TYPE_SIZE_MAP =
-	{
-		{ Type::UCHAR, 1 },
-		{ Type::INT, 4 },
-		{ Type::FLOAT, 4 },
-		{ Type::DOUBLE, 8 },
 	};
 
 	class IProperty
@@ -86,9 +67,9 @@ namespace libply
 		virtual void insert() = 0;
 	};
 
-	///////////////////////////////////////////////////////////////////////////
-
 	typedef std::map<std::string, IElementInserter*> InserterMap;
+
+	/// Type conversion functions.
 
 	inline void convert_UCHAR(const textio::SubString& token, IProperty& property)
 	{
@@ -120,6 +101,8 @@ namespace libply
 		{ Type::FLOAT, convert_FLOAT },
 		{ Type::DOUBLE, convert_DOUBLE }
 	};
+
+	/// Type casting functions.
 
 	inline void cast_UCHAR(char* buffer, IProperty& property)
 	{
@@ -167,6 +150,8 @@ namespace libply
 		ConversionFunction conversionFunction;
 		CastFunction castFunction;
 	};
+
+	typedef std::size_t ElementSize;
 
 	struct ElementDefinition
 	{

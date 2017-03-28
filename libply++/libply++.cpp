@@ -1,4 +1,4 @@
-#include "libply++.h"
+#include "libplyxx_internal.h"
 
 #include <fstream>
 #include <string>
