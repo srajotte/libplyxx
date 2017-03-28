@@ -5,3 +5,4 @@
 /visualstudio/*.psess
 /visualstudio/*.vspx
 /visualstudio/*.opendb
+/CMakeFiles
