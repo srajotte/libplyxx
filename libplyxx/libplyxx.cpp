@@ -7,11 +7,24 @@ namespace libply
 {
 File::File(const std::wstring& filename)
 	: m_filename(filename),
-	m_lineTokenizer(' '),
-	m_lineReader(filename)
+	m_parser(filename)
 {
-	readHeader();
 }
+
+const std::vector<ElementDefinition>& File::definitions() const 
+{ 
+	return m_parser.definitions(); 
+}
+
+void File::setElementInserter(std::string elementName, IElementInserter* inserter) 
+{
+	m_parser.setElementInserter(elementName, inserter); 
+}
+
+void File::read()
+{ 
+	m_parser.read(); 
+};
 
 void addElementDefinition(const textio::Tokenizer::TokenList& tokens, std::vector<ElementDefinition>& elementDefinitions)
 {
@@ -39,7 +52,16 @@ void addProperty(const textio::Tokenizer::TokenList& tokens, ElementDefinition& 
 	}
 }
 
-void File::readHeader()
+FileParser::FileParser(const std::wstring& filename)
+	: m_filename(filename),
+	m_lineTokenizer(' '),
+	m_lineReader(filename)
+{
+	readHeader();
+}
+
+
+void FileParser::readHeader()
 {
 	// Read PLY magic number.
 	std::string line = m_lineReader.getline();
@@ -52,15 +74,15 @@ void File::readHeader()
 	line = m_lineReader.getline();
 	if (line == "format ascii 1.0")
 	{
-		m_format = Format::ASCII;
+		m_format = File::Format::ASCII;
 	}
 	else if (line == "format binary_little_endian 1.0")
 	{
-		m_format = Format::BINARY_LITTLE_ENDIAN;
+		m_format = File::Format::BINARY_LITTLE_ENDIAN;
 	}
 	else if (line == "format binary_big_endian 1.0")
 	{
-		m_format = Format::BINARY_BIG_ENDIAN;
+		m_format = File::Format::BINARY_BIG_ENDIAN;
 	}
 	else
 	{
@@ -98,12 +120,12 @@ void File::readHeader()
 	m_dataOffset = m_lineReader.position(line_substring.end()) + 1;
 }
 
-void File::setElementInserter(std::string elementName, IElementInserter* inserter)
+void FileParser::setElementInserter(std::string elementName, IElementInserter* inserter)
 {
 	m_inserterMap[elementName] = inserter;
 }
 
-const void File::read()
+void FileParser::read()
 {
 	std::size_t totalLines = 0;
 	for (auto& e : m_elements)
@@ -120,7 +142,7 @@ const void File::read()
 	
 	std::ifstream& filestream = m_lineReader.filestream();
 
-	if (m_format == Format::BINARY_BIG_ENDIAN || m_format == Format::BINARY_LITTLE_ENDIAN)
+	if (m_format == File::Format::BINARY_BIG_ENDIAN || m_format == File::Format::BINARY_LITTLE_ENDIAN)
 	{
 		filestream.clear();
 		filestream.seekg(m_dataOffset);
@@ -137,7 +159,7 @@ const void File::read()
 			properties = elementInserter->properties();
 		}
 
-		if (m_format == Format::ASCII)
+		if (m_format == File::Format::ASCII)
 		{
 			auto line = m_lineReader.getline();
 			parseLine(line, elementDefinition, properties);
@@ -151,7 +173,7 @@ const void File::read()
 	}
 }
 
-void File::parseLine(const textio::SubString& line, const ElementDefinition& elementDefinition, const PropertyMap& pm)
+void FileParser::parseLine(const textio::SubString& line, const ElementDefinition& elementDefinition, const PropertyMap& pm)
 {
 	m_lineTokenizer.tokenize(line, m_tokens);
 	const auto& properties = elementDefinition.properties;
@@ -175,7 +197,7 @@ void File::parseLine(const textio::SubString& line, const ElementDefinition& ele
 	}
 }
 
-void File::readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& pm)
+void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& pm)
 {
 	const auto& properties = elementDefinition.properties;
 	const unsigned int MAX_PROPERTY_SIZE = 8;

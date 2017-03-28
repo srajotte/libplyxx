@@ -112,12 +112,6 @@ void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIn
 	triangles.reserve(triangleCount);
 	TriangleInserter triangleInserter(triangles);
 
-	libply::InserterMap inserters =
-	{
-		{ "vertex" , &vertexInserter },
-		{ "face" , &triangleInserter }
-	};
-
 	file.setElementInserter("vertex", &vertexInserter);
 	file.setElementInserter("face", &triangleInserter);
 	file.read();
