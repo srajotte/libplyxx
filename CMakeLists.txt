@@ -4,6 +4,8 @@ project(libplyxx)
 file(GLOB LIB_SOURCES "libply++/*.cpp")
 file(GLOB TEST_SOURCES "test/*.cpp")
 
+include_directories("libply++")
+
 add_library(libplyxx STATIC ${LIB_SOURCES})
 add_executable(libplyxx_test ${TEST_SOURCES})
 target_link_libraries(libplyxx_test libplyxx)
