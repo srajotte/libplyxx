@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(libplyxx)
 
-file(GLOB LIB_SOURCES "libply++/*.cpp")
+file(GLOB LIB_SOURCES "libplyxx/*.cpp")
 file(GLOB TEST_SOURCES "test/*.cpp")
 
-include_directories("libply++")
+include_directories("libplyxx")
 
 add_library(libplyxx STATIC ${LIB_SOURCES})
 add_executable(libplyxx_test ${TEST_SOURCES})

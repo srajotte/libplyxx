@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "libply++.h"
+#include "libplyxx.h"
 
 bool areClose(double a, double b)
 {
