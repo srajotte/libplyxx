@@ -7,23 +7,25 @@ namespace libply
 {
 File::File(const std::wstring& filename)
 	: m_filename(filename),
-	m_parser(filename)
+	m_parser(std::make_unique<FileParser>(filename))
 {
 }
 
-const std::vector<ElementDefinition>& File::definitions() const 
+File::~File() = default;
+
+std::vector<Element> File::definitions() const 
 { 
-	return m_parser.definitions(); 
+	return m_parser->definitions(); 
 }
 
 void File::setElementInserter(std::string elementName, IElementInserter* inserter) 
 {
-	m_parser.setElementInserter(elementName, inserter); 
+	m_parser->setElementInserter(elementName, inserter); 
 }
 
 void File::read()
 { 
-	m_parser.read(); 
+	m_parser->read(); 
 };
 
 void addElementDefinition(const textio::Tokenizer::TokenList& tokens, std::vector<ElementDefinition>& elementDefinitions)
@@ -52,6 +54,21 @@ void addProperty(const textio::Tokenizer::TokenList& tokens, ElementDefinition& 
 	}
 }
 
+Property PropertyDefinition::getProperty() const
+{
+	return Property(name, type, isList);
+}
+
+Element ElementDefinition::getElement() const
+{
+	std::vector<Property> properties;
+	for (const auto& p : this->properties)
+	{
+		properties.emplace_back(p.getProperty());
+	}
+	return Element(name, size, properties);
+}
+
 FileParser::FileParser(const std::wstring& filename)
 	: m_filename(filename),
 	m_lineTokenizer(' '),
@@ -60,6 +77,17 @@ FileParser::FileParser(const std::wstring& filename)
 	readHeader();
 }
 
+FileParser::~FileParser() = default;
+
+std::vector<Element> FileParser::definitions() const
+{
+	std::vector<Element> elements;
+	for (const auto& e : m_elements)
+	{
+		elements.emplace_back(e.getElement());
+	}
+	return elements;
+}
 
 void FileParser::readHeader()
 {

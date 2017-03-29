@@ -100,6 +100,8 @@ void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIn
 {
 	libply::File file(filename);
 
+	int temp = 1;
+
 	const auto& definitions = file.definitions();
 
 	const auto vertexDefinition = definitions.at(0);

@@ -22,12 +22,114 @@ namespace libply
 		{ Type::DOUBLE, 8 },
 	};
 
+	typedef std::map<std::string, IElementInserter*> InserterMap;
+
+	/// Type conversion functions.
+
+	inline void convert_UCHAR(const textio::SubString& token, IProperty& property)
+	{
+		property = textio::stou<unsigned char>(token);
+	}
+
+	inline void convert_INT(const textio::SubString& token, IProperty& property)
+	{
+		property = textio::stoi<int>(token);
+	}
+
+	inline void convert_FLOAT(const textio::SubString& token, IProperty& property)
+	{
+		property = textio::stor<float>(token);
+	}
+
+	inline void convert_DOUBLE(const textio::SubString& token, IProperty& property)
+	{
+		property = textio::stor<double>(token);
+	}
+
+	typedef void(*ConversionFunction)(const textio::SubString&, IProperty&);
+	typedef std::unordered_map<Type, ConversionFunction> ConversionFunctionMap;
+
+	const ConversionFunctionMap CONVERSION_MAP =
+	{
+		{ Type::UCHAR , convert_UCHAR },
+		{ Type::INT, convert_INT },
+		{ Type::FLOAT, convert_FLOAT },
+		{ Type::DOUBLE, convert_DOUBLE }
+	};
+
+	/// Type casting functions.
+
+	inline void cast_UCHAR(char* buffer, IProperty& property)
+	{
+		property = *reinterpret_cast<unsigned char*>(buffer);
+	}
+
+	inline void cast_INT(char* buffer, IProperty& property)
+	{
+		property = *reinterpret_cast<int*>(buffer);
+	}
+
+	inline void cast_FLOAT(char* buffer, IProperty& property)
+	{
+		property = *reinterpret_cast<float*>(buffer);
+	}
+
+	inline void cast_DOUBLE(char* buffer, IProperty& property)
+	{
+		property = *reinterpret_cast<double*>(buffer);
+	}
+
+	typedef void(*CastFunction)(char* buffer, IProperty&);
+	typedef std::unordered_map<Type, CastFunction> CastFunctionMap;
+
+	const CastFunctionMap CAST_MAP =
+	{
+		{ Type::UCHAR , cast_UCHAR },
+		{ Type::INT, cast_INT },
+		{ Type::FLOAT, cast_FLOAT },
+		{ Type::DOUBLE, cast_DOUBLE }
+	};
+
+	struct PropertyDefinition
+	{
+		PropertyDefinition(const std::string& name, Type type, bool isList, Type listLengthType = Type::UCHAR)
+			: name(name), type(type), isList(isList), listLengthType(listLengthType),
+			conversionFunction(CONVERSION_MAP.at(type)),
+			castFunction(CAST_MAP.at(type))
+		{};
+
+		Property getProperty() const;
+
+		std::string name;
+		Type type;
+		bool isList;
+		Type listLengthType;
+		ConversionFunction conversionFunction;
+		CastFunction castFunction;
+	};
+
+	struct ElementDefinition
+	{
+		ElementDefinition() : ElementDefinition("", 0, 0) {};
+		ElementDefinition(const std::string& name, ElementSize size, std::size_t startLine)
+			: name(name), size(size), startLine(startLine) {};
+
+		Element getElement() const;
+
+		std::string name;
+		ElementSize size;
+		std::vector<PropertyDefinition> properties;
+		std::size_t startLine;
+	};
+
 	class FileParser
 	{
 	public:
-		FileParser(const std::wstring& filename);
+		explicit FileParser(const std::wstring& filename);
+		FileParser(const FileParser& other) = delete;
+		~FileParser();
 		
-		const std::vector<ElementDefinition>& definitions() const { return m_elements; };
+		std::vector<Element> definitions() const;
 		void setElementInserter(std::string elementName, IElementInserter* inserter);
 		void read();
 
