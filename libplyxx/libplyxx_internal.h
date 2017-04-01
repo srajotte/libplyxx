@@ -26,27 +26,27 @@ namespace libply
 
 	/// Type conversion functions.
 
-	inline void convert_UCHAR(const textio::SubString& token, IProperty& property)
+	inline void convert_UCHAR(const textio::SubString& token, IScalarProperty& property)
 	{
 		property = textio::stou<unsigned char>(token);
 	}
 
-	inline void convert_INT(const textio::SubString& token, IProperty& property)
+	inline void convert_INT(const textio::SubString& token, IScalarProperty& property)
 	{
 		property = textio::stoi<int>(token);
 	}
 
-	inline void convert_FLOAT(const textio::SubString& token, IProperty& property)
+	inline void convert_FLOAT(const textio::SubString& token, IScalarProperty& property)
 	{
 		property = textio::stor<float>(token);
 	}
 
-	inline void convert_DOUBLE(const textio::SubString& token, IProperty& property)
+	inline void convert_DOUBLE(const textio::SubString& token, IScalarProperty& property)
 	{
 		property = textio::stor<double>(token);
 	}
 
-	typedef void(*ConversionFunction)(const textio::SubString&, IProperty&);
+	typedef void(*ConversionFunction)(const textio::SubString&, IScalarProperty&);
 	typedef std::unordered_map<Type, ConversionFunction> ConversionFunctionMap;
 
 	const ConversionFunctionMap CONVERSION_MAP =
@@ -59,27 +59,27 @@ namespace libply
 
 	/// Type casting functions.
 
-	inline void cast_UCHAR(char* buffer, IProperty& property)
+	inline void cast_UCHAR(char* buffer, IScalarProperty& property)
 	{
 		property = *reinterpret_cast<unsigned char*>(buffer);
 	}
 
-	inline void cast_INT(char* buffer, IProperty& property)
+	inline void cast_INT(char* buffer, IScalarProperty& property)
 	{
 		property = *reinterpret_cast<int*>(buffer);
 	}
 
-	inline void cast_FLOAT(char* buffer, IProperty& property)
+	inline void cast_FLOAT(char* buffer, IScalarProperty& property)
 	{
 		property = *reinterpret_cast<float*>(buffer);
 	}
 
-	inline void cast_DOUBLE(char* buffer, IProperty& property)
+	inline void cast_DOUBLE(char* buffer, IScalarProperty& property)
 	{
 		property = *reinterpret_cast<double*>(buffer);
 	}
 
-	typedef void(*CastFunction)(char* buffer, IProperty&);
+	typedef void(*CastFunction)(char* buffer, IScalarProperty&);
 	typedef std::unordered_map<Type, CastFunction> CastFunctionMap;
 
 	const CastFunctionMap CAST_MAP =

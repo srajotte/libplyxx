@@ -257,17 +257,40 @@ void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& e
 	}
 }
 
+ElementBuffer::ElementBuffer(const ElementDefinition& definition)
+{
+	auto ppties = definition.properties;
+	for (auto& p : ppties)
+	{
+		if (p.isList)
+		{
+			appendListProperty(p.name, p.type);
+		}
+		else
+		{
+			appendScalarProperty(p.name, p.type);
+		}
+	}
+
+}
+
 void ElementBuffer::appendScalarProperty(const std::string& name, Type type)
 {
-	std::unique_ptr<IProperty> prop(nullptr);
+	appendListProperty(name, type);
+}
+
+void ElementBuffer::appendListProperty(const std::string& name, Type type)
+{
+	std::unique_ptr<IListProperty> prop(nullptr);
 	switch (type)
 	{
-	case Type::UCHAR: prop = std::make_unique<ScalarProperty<char>>();  break;
-	case Type::INT: prop = std::make_unique<ScalarProperty<int>>(); break;
-	case Type::FLOAT: prop = std::make_unique<ScalarProperty<float>>(); break;
-	case Type::DOUBLE: prop = std::make_unique<ScalarProperty<double>>(); break;
+	case Type::UCHAR: prop = std::make_unique<ListProperty<char>>(1);  break;
+	case Type::INT: prop = std::make_unique<ListProperty<int>>(1); break;
+	case Type::FLOAT: prop = std::make_unique<ListProperty<float>>(1); break;
+	case Type::DOUBLE: prop = std::make_unique<ListProperty<double>>(1); break;
 	}
 	properties.push_back(std::move(prop));
 	propertyNames.push_back(name);
 }
+
 }

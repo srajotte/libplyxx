@@ -32,44 +32,71 @@ namespace libply
 		//FLOAT64
 	};
 
-	class IProperty
+	class IScalarProperty
 	{
 	public:
-		virtual IProperty& operator=(unsigned int value) = 0;
-		virtual IProperty& operator=(int value) = 0;
-		virtual IProperty& operator=(float value) = 0;
-		virtual IProperty& operator=(double value) = 0;
+		virtual IScalarProperty& operator=(unsigned int value) = 0;
+		virtual IScalarProperty& operator=(int value) = 0;
+		virtual IScalarProperty& operator=(float value) = 0;
+		virtual IScalarProperty& operator=(double value) = 0;
 	};
 
 	template<typename InternalType>
-	class ScalarProperty: public IProperty
+	class ScalarProperty: public IScalarProperty
 	{
 	public :
-		virtual ScalarProperty& operator=(unsigned int value)
-			{ m_scalar = static_cast<InternalType>(value); return *this; };
-		virtual ScalarProperty& operator=(int value)
-			{ m_scalar = static_cast<InternalType>(value); return *this; };
-		virtual ScalarProperty& operator=(float value)
-			{ m_scalar = static_cast<InternalType>(value); return *this; };
-		virtual ScalarProperty& operator=(double value)
-			{ m_scalar = static_cast<InternalType>(value); return *this; };
+		ScalarProperty& operator=(unsigned int value)
+			{ m_value = static_cast<InternalType>(value); return *this; };
+		ScalarProperty& operator=(int value)
+			{ m_value = static_cast<InternalType>(value); return *this; };
+		ScalarProperty& operator=(float value)
+			{ m_value = static_cast<InternalType>(value); return *this; };
+		ScalarProperty& operator=(double value)
+			{ m_value = static_cast<InternalType>(value); return *this; };
 
-		InternalType value() const { return m_scalar; };
+	public:
+		InternalType value() const { return m_value; };
+
 	private :
-		InternalType m_scalar;
+		InternalType m_value;
 	};
 
-	typedef std::unordered_map<std::size_t, IProperty*> PropertyMap;
+	class IListProperty
+	{
+		virtual void reset(size_t size) = 0;
+		virtual IScalarProperty& operator[](size_t index) const = 0;
+	};
+
+	template<typename InternalType>
+	class ListProperty : IListProperty
+	{
+	public:
+		ListProperty() {};
+		ListProperty(size_t size) : m_values(size, 0) {};
+
+	public:
+		virtual void reset(size_t size) { m_values.resize(size); };
+		virtual ScalarProperty<InternalType>& operator[](size_t index) const { return m_values[index]; };
+
+	private:
+		std::vector<ScalarProperty<InternalType>> m_values;
+	};
+
+	typedef std::unordered_map<std::size_t, IScalarProperty*> PropertyMap;
+
+	struct ElementDefinition;
 
 	class ElementBuffer
 	{
 	public:
+		ElementBuffer(const ElementDefinition& definition);
+
 		void appendScalarProperty(const std::string& name, Type type);
-		//void appendPropertyList(const std::string& name, Type type, std::size_t size);
+		void appendListProperty(const std::string& name, Type type);
 
 	public:
 		std::vector<std::string> propertyNames;
-		std::vector<std::unique_ptr<IProperty>> properties;
+		std::vector<std::unique_ptr<IListProperty>> properties;
 	};
 
 	class IElementInserter
