@@ -256,4 +256,18 @@ void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& e
 		}
 	}
 }
+
+void ElementBuffer::appendScalarProperty(const std::string& name, Type type)
+{
+	std::unique_ptr<IProperty> prop(nullptr);
+	switch (type)
+	{
+	case Type::UCHAR: prop = std::make_unique<ScalarProperty<char>>();  break;
+	case Type::INT: prop = std::make_unique<ScalarProperty<int>>(); break;
+	case Type::FLOAT: prop = std::make_unique<ScalarProperty<float>>(); break;
+	case Type::DOUBLE: prop = std::make_unique<ScalarProperty<double>>(); break;
+	}
+	properties.push_back(std::move(prop));
+	propertyNames.push_back(name);
+}
 }

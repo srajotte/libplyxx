@@ -61,6 +61,17 @@ namespace libply
 
 	typedef std::unordered_map<std::size_t, IProperty*> PropertyMap;
 
+	class ElementBuffer
+	{
+	public:
+		void appendScalarProperty(const std::string& name, Type type);
+		//void appendPropertyList(const std::string& name, Type type, std::size_t size);
+
+	public:
+		std::vector<std::string> propertyNames;
+		std::vector<std::unique_ptr<IProperty>> properties;
+	};
+
 	class IElementInserter
 	{
 	public:
