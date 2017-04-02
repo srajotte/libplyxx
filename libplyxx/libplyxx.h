@@ -45,13 +45,13 @@ namespace libply
 	class ScalarProperty: public IScalarProperty
 	{
 	public :
-		ScalarProperty& operator=(unsigned int value)
+		virtual ScalarProperty& operator=(unsigned int value) override
 			{ m_value = static_cast<InternalType>(value); return *this; };
-		ScalarProperty& operator=(int value)
+		virtual ScalarProperty& operator=(int value) override
 			{ m_value = static_cast<InternalType>(value); return *this; };
-		ScalarProperty& operator=(float value)
+		virtual ScalarProperty& operator=(float value) override
 			{ m_value = static_cast<InternalType>(value); return *this; };
-		ScalarProperty& operator=(double value)
+		virtual ScalarProperty& operator=(double value) override
 			{ m_value = static_cast<InternalType>(value); return *this; };
 
 	public:
@@ -64,19 +64,21 @@ namespace libply
 	class IListProperty
 	{
 		virtual void reset(size_t size) = 0;
-		virtual IScalarProperty& operator[](size_t index) const = 0;
+		virtual IScalarProperty& operator[](size_t index) = 0;
 	};
 
 	template<typename InternalType>
-	class ListProperty : IListProperty
+	class ListProperty : public IListProperty
 	{
 	public:
 		ListProperty() {};
-		ListProperty(size_t size) : m_values(size, 0) {};
+		ListProperty(size_t size) : m_values(size) {};
 
 	public:
-		virtual void reset(size_t size) { m_values.resize(size); };
-		virtual ScalarProperty<InternalType>& operator[](size_t index) const { return m_values[index]; };
+		virtual void reset(size_t size) override
+			{ m_values.resize(size); };
+		virtual ScalarProperty<InternalType>& operator[](size_t index) override
+			{ return m_values[index]; };
 
 	private:
 		std::vector<ScalarProperty<InternalType>> m_values;

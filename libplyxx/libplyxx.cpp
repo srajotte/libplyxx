@@ -281,7 +281,7 @@ void ElementBuffer::appendScalarProperty(const std::string& name, Type type)
 
 void ElementBuffer::appendListProperty(const std::string& name, Type type)
 {
-	std::unique_ptr<IListProperty> prop(nullptr);
+	std::unique_ptr<IListProperty> prop;
 	switch (type)
 	{
 	case Type::UCHAR: prop = std::make_unique<ListProperty<char>>(1);  break;
