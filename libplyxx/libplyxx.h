@@ -61,30 +61,6 @@ namespace libply
 		InternalType m_value;
 	};
 
-	class IListProperty
-	{
-	public:
-		virtual void reset(size_t size) = 0;
-		virtual IScalarProperty& operator[](size_t index) = 0;
-	};
-
-	template<typename InternalType>
-	class ListProperty : public IListProperty
-	{
-	public:
-		ListProperty() {};
-		ListProperty(size_t size) : m_values(size) {};
-
-	public:
-		virtual void reset(size_t size) override
-			{ m_values.resize(size); };
-		virtual ScalarProperty<InternalType>& operator[](size_t index) override
-			{ return m_values[index]; };
-
-	private:
-		std::vector<ScalarProperty<InternalType>> m_values;
-	};
-
 	typedef std::unordered_map<std::size_t, IScalarProperty*> PropertyMap;
 
 	struct ElementDefinition;
