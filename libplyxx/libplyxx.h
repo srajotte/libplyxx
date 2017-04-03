@@ -91,8 +91,10 @@ namespace libply
 	class ElementBuffer
 	{
 	public:
+		ElementBuffer() = default;
 		ElementBuffer(const ElementDefinition& definition);
 
+	private:
 		void appendScalarProperty(const std::string& name, Type type);
 		void appendListProperty(const std::string& name, Type type);
 

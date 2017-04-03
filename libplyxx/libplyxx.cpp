@@ -161,6 +161,12 @@ void FileParser::read()
 		totalLines += e.size;
 	}
 
+	std::vector<std::shared_ptr<ElementBuffer>> buffers;
+	for (auto& e : m_elements)
+	{
+		buffers.emplace_back(std::make_shared<ElementBuffer>(e));
+	}
+
 	std::size_t lineIndex = 0;
 	std::size_t elementIndex = 0;
 	IElementInserter* elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
@@ -168,6 +174,8 @@ void FileParser::read()
 	auto& elementDefinition = m_elements.at(elementIndex);
 	const std::size_t maxElementIndex = m_elements.size();
 	
+	std::shared_ptr<ElementBuffer> buffer = buffers[elementIndex];
+
 	std::ifstream& filestream = m_lineReader.filestream();
 
 	if (m_format == File::Format::BINARY_BIG_ENDIAN || m_format == File::Format::BINARY_LITTLE_ENDIAN)
@@ -185,6 +193,8 @@ void FileParser::read()
 			elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
 			elementDefinition = m_elements.at(elementIndex);
 			properties = elementInserter->properties();
+
+			buffer = buffers[elementIndex];
 		}
 
 		if (m_format == File::Format::ASCII)
@@ -259,8 +269,8 @@ void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& e
 
 ElementBuffer::ElementBuffer(const ElementDefinition& definition)
 {
-	auto ppties = definition.properties;
-	for (auto& p : ppties)
+	auto& properties = definition.properties;
+	for (auto& p : properties)
 	{
 		if (p.isList)
 		{
