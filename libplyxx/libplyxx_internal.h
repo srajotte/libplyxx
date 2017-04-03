@@ -135,8 +135,8 @@ namespace libply
 
 	private:
 		void readHeader();
-		void parseLine(const textio::SubString& substr, const ElementDefinition& elementDefinition, const PropertyMap& am);
-		void readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& am);
+		void parseLine(const textio::SubString& substr, const ElementDefinition& elementDefinition, const PropertyMap& am, ElementBuffer& buffer);
+		void readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& am, ElementBuffer& buffer);
 
 	private:
 		std::wstring m_filename;

@@ -63,6 +63,7 @@ namespace libply
 
 	class IListProperty
 	{
+	public:
 		virtual void reset(size_t size) = 0;
 		virtual IScalarProperty& operator[](size_t index) = 0;
 	};

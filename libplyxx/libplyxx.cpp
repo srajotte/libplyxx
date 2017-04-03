@@ -200,10 +200,10 @@ void FileParser::read()
 		if (m_format == File::Format::ASCII)
 		{
 			auto line = m_lineReader.getline();
-			parseLine(line, elementDefinition, properties);
+			parseLine(line, elementDefinition, properties, *buffer);
 		}
 		else {
-			readBinaryElement(filestream, elementDefinition, properties);
+			readBinaryElement(filestream, elementDefinition, properties, *buffer);
 		}
 		
 		elementInserter->insert();
@@ -211,7 +211,7 @@ void FileParser::read()
 	}
 }
 
-void FileParser::parseLine(const textio::SubString& line, const ElementDefinition& elementDefinition, const PropertyMap& pm)
+void FileParser::parseLine(const textio::SubString& line, const ElementDefinition& elementDefinition, const PropertyMap& pm, ElementBuffer& elementBuffer)
 {
 	m_lineTokenizer.tokenize(line, m_tokens);
 	const auto& properties = elementDefinition.properties;
@@ -222,6 +222,7 @@ void FileParser::parseLine(const textio::SubString& line, const ElementDefinitio
 		{
 			auto i = kv.first;
 			properties[i].conversionFunction(m_tokens[i], *kv.second);
+			properties[i].conversionFunction(m_tokens[i], (*(elementBuffer.properties)[i])[0]);
 		}
 	}
 	else
@@ -235,7 +236,7 @@ void FileParser::parseLine(const textio::SubString& line, const ElementDefinitio
 	}
 }
 
-void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& pm)
+void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& pm, ElementBuffer& elementBuffer)
 {
 	const auto& properties = elementDefinition.properties;
 	const unsigned int MAX_PROPERTY_SIZE = 8;
