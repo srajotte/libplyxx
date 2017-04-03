@@ -95,13 +95,19 @@ namespace libply
 		ElementBuffer() = default;
 		ElementBuffer(const ElementDefinition& definition);
 
-	private:
-		void appendScalarProperty(const std::string& name, Type type);
-		void appendListProperty(const std::string& name, Type type);
-
 	public:
-		std::vector<std::string> propertyNames;
-		std::vector<std::unique_ptr<IListProperty>> properties;
+		void reset(size_t size);
+		IScalarProperty& operator[](size_t index);
+
+	private:
+		void appendScalarProperty(Type type);
+		void appendListProperty(Type type);
+		std::unique_ptr<IScalarProperty> getScalarProperty(Type type);
+
+	private:
+		bool m_isList;
+		Type m_listType;
+		std::vector<std::unique_ptr<IScalarProperty>> properties;
 	};
 
 	class IElementInserter

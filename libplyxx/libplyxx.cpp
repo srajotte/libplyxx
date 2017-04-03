@@ -222,16 +222,19 @@ void FileParser::parseLine(const textio::SubString& line, const ElementDefinitio
 		{
 			auto i = kv.first;
 			properties[i].conversionFunction(m_tokens[i], *kv.second);
-			properties[i].conversionFunction(m_tokens[i], (*(elementBuffer.properties)[i])[0]);
+			properties[i].conversionFunction(m_tokens[i], elementBuffer[i]);
 		}
 	}
 	else
 	{
 		const auto& conversionFunction = properties[0].conversionFunction;
+		size_t listLength = std::stoi(m_tokens[0]);
+		elementBuffer.reset(listLength);
 		for (auto& kv : pm)
 		{
 			auto i = kv.first + 1;
 			conversionFunction(m_tokens[i], *kv.second);
+			conversionFunction(m_tokens[i], elementBuffer[i-1]);
 		}
 	}
 }
@@ -269,39 +272,66 @@ void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& e
 }
 
 ElementBuffer::ElementBuffer(const ElementDefinition& definition)
+	: m_isList(false)
 {
 	auto& properties = definition.properties;
 	for (auto& p : properties)
 	{
 		if (p.isList)
 		{
-			appendListProperty(p.name, p.type);
+			appendListProperty(p.type);
 		}
 		else
 		{
-			appendScalarProperty(p.name, p.type);
+			appendScalarProperty(p.type);
 		}
 	}
 
 }
 
-void ElementBuffer::appendScalarProperty(const std::string& name, Type type)
+void ElementBuffer::reset(size_t size)
 {
-	appendListProperty(name, type);
+	if (properties.size() < size)
+	{
+		while (properties.size() < size)
+		{
+			properties.emplace_back(std::move(getScalarProperty(m_listType)));
+		}
+	}
+	else
+	{
+		properties.resize(size);
+	}
 }
 
-void ElementBuffer::appendListProperty(const std::string& name, Type type)
+IScalarProperty& ElementBuffer::operator[](size_t index)
 {
-	std::unique_ptr<IListProperty> prop;
+	return *properties[index];
+}
+
+void ElementBuffer::appendScalarProperty(Type type)
+{
+	std::unique_ptr<IScalarProperty> prop = getScalarProperty(type);
+	properties.push_back(std::move(prop));
+}
+
+void ElementBuffer::appendListProperty(Type type)
+{
+	m_isList = true;
+	m_listType = type;
+}
+
+std::unique_ptr<IScalarProperty> ElementBuffer::getScalarProperty(Type type)
+{
+	std::unique_ptr<IScalarProperty> prop;
 	switch (type)
 	{
-	case Type::UCHAR: prop = std::make_unique<ListProperty<char>>(1);  break;
-	case Type::INT: prop = std::make_unique<ListProperty<int>>(1); break;
-	case Type::FLOAT: prop = std::make_unique<ListProperty<float>>(1); break;
-	case Type::DOUBLE: prop = std::make_unique<ListProperty<double>>(1); break;
+	case Type::UCHAR: prop = std::make_unique<ScalarProperty<char>>();  break;
+	case Type::INT: prop = std::make_unique<ScalarProperty<int>>(); break;
+	case Type::FLOAT: prop = std::make_unique<ScalarProperty<float>>(); break;
+	case Type::DOUBLE: prop = std::make_unique<ScalarProperty<double>>(); break;
 	}
-	properties.push_back(std::move(prop));
-	propertyNames.push_back(name);
+	return std::move(prop);
 }
 
 }
