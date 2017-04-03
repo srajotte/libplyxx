@@ -29,7 +29,7 @@ struct Mesh
 	TriangleIndicesList triangles;
 };
 
-class VertexInserter : public libply::IElementInserter
+/*class VertexInserter : public libply::IElementInserter
 {
 public:
 	VertexInserter(Mesh::VertexList& vertices);
@@ -94,7 +94,7 @@ void TriangleInserter::insert()
 {
 	// Must construct and move temporary object, because std::array doesn't have an initializer list constructor.
 	m_triangles.emplace_back(std::move(Mesh::TriangleIndices{ v0.value(), v1.value(), v2.value() }));
-}
+}*/
 
 void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles)
 {
@@ -107,15 +107,23 @@ void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIn
 	const auto vertexDefinition = definitions.at(0);
 	const size_t vertexCount = vertexDefinition.size;
 	vertices.reserve(vertexCount);
-	VertexInserter vertexInserter(vertices);
+	//VertexInserter vertexInserter(vertices);
+	libply::ElementReadCallback vertexCallback = [&vertices](libply::ElementBuffer& e)
+		{
+			vertices.emplace_back(e[0], e[1], e[2]);
+		};
 
 	const auto triangleDefinition = definitions.at(1);
 	const size_t triangleCount = triangleDefinition.size;
 	triangles.reserve(triangleCount);
-	TriangleInserter triangleInserter(triangles);
+	//TriangleInserter triangleInserter(triangles);
+	libply::ElementReadCallback triangleCallback = [&triangles](libply::ElementBuffer& e)
+	{
+		triangles.emplace_back(std::move(Mesh::TriangleIndices{ e[0], e[1], e[2]}));
+	};
 
-	file.setElementInserter("vertex", &vertexInserter);
-	file.setElementInserter("face", &triangleInserter);
+	file.setElementReadCallback("vertex", vertexCallback);
+	file.setElementReadCallback("face", triangleCallback);
 	file.read();
 }
 

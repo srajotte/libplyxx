@@ -22,8 +22,6 @@ namespace libply
 		{ Type::DOUBLE, 8 },
 	};
 
-	typedef std::map<std::string, IElementInserter*> InserterMap;
-
 	/// Type conversion functions.
 
 	inline void convert_UCHAR(const textio::SubString& token, IScalarProperty& property)
@@ -130,13 +128,17 @@ namespace libply
 		~FileParser();
 		
 		std::vector<Element> definitions() const;
-		void setElementInserter(std::string elementName, IElementInserter* inserter);
+		//void setElementInserter(std::string elementName, IElementInserter* inserter);
+		void setElementReadCallback(std::string elementName, ElementReadCallback& readCallback);
 		void read();
 
 	private:
 		void readHeader();
-		void parseLine(const textio::SubString& substr, const ElementDefinition& elementDefinition, const PropertyMap& am, ElementBuffer& buffer);
-		void readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& am, ElementBuffer& buffer);
+		void parseLine(const textio::SubString& substr, const ElementDefinition& elementDefinition, ElementBuffer& buffer);
+		void readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, ElementBuffer& buffer);
+
+	private:
+		typedef std::map<std::string, ElementReadCallback> CallbackMap;
 
 	private:
 		std::wstring m_filename;
@@ -146,6 +148,6 @@ namespace libply
 		textio::Tokenizer m_lineTokenizer;
 		textio::Tokenizer::TokenList m_tokens;
 		std::vector<ElementDefinition> m_elements;
-		InserterMap m_inserterMap;
+		CallbackMap m_readCallbackMap;
 	};
 }

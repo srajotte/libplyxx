@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <cassert>
 #include <memory>
+#include <functional>
 
 #include "textio.h"
 
@@ -39,6 +40,11 @@ namespace libply
 		virtual IScalarProperty& operator=(int value) = 0;
 		virtual IScalarProperty& operator=(float value) = 0;
 		virtual IScalarProperty& operator=(double value) = 0;
+
+		virtual operator unsigned int() = 0;
+		virtual operator int() = 0;
+		virtual operator float() = 0;
+		virtual operator double() = 0;
 	};
 
 	template<typename InternalType>
@@ -54,6 +60,23 @@ namespace libply
 		virtual ScalarProperty& operator=(double value) override
 			{ m_value = static_cast<InternalType>(value); return *this; };
 
+		virtual operator unsigned int() override
+		{
+			return static_cast<unsigned int>(m_value);
+		};
+		virtual operator int() override
+		{
+			return static_cast<int>(m_value);
+		};
+		virtual operator float() override
+		{
+			return static_cast<float>(m_value);
+		};
+		virtual operator double() override
+		{
+			return static_cast<double>(m_value);
+		};
+
 	public:
 		InternalType value() const { return m_value; };
 
@@ -61,7 +84,7 @@ namespace libply
 		InternalType m_value;
 	};
 
-	typedef std::unordered_map<std::size_t, IScalarProperty*> PropertyMap;
+	//typedef std::unordered_map<std::size_t, IScalarProperty*> PropertyMap;
 
 	struct ElementDefinition;
 
@@ -73,6 +96,7 @@ namespace libply
 
 	public:
 		void reset(size_t size);
+		size_t size() const { return properties.size(); };
 		IScalarProperty& operator[](size_t index);
 
 	private:
@@ -86,12 +110,12 @@ namespace libply
 		std::vector<std::unique_ptr<IScalarProperty>> properties;
 	};
 
-	class IElementInserter
+	/*class IElementInserter
 	{
 	public:
 		virtual PropertyMap properties() = 0;
 		virtual void insert() = 0;
-	};
+	};*/
 	
 	typedef std::size_t ElementSize;
 
@@ -115,6 +139,9 @@ namespace libply
 		std::vector<Property> properties;
 	};
 
+	//typedef void(*ElementReadCallback)(ElementBuffer& buffer);
+	typedef std::function< void(ElementBuffer&) > ElementReadCallback;
+
 	class FileParser;
 
 	class File
@@ -124,7 +151,8 @@ namespace libply
 		~File();
 
 		std::vector<Element> definitions() const;
-		void setElementInserter(std::string elementName, IElementInserter* inserter);
+		//void setElementInserter(std::string elementName, IElementInserter* inserter);
+		void setElementReadCallback(std::string elementName, ElementReadCallback& readCallback);
 		void read();
 
 	public:

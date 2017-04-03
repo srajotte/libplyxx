@@ -18,10 +18,16 @@ std::vector<Element> File::definitions() const
 	return m_parser->definitions(); 
 }
 
-void File::setElementInserter(std::string elementName, IElementInserter* inserter) 
+
+void File::setElementReadCallback(std::string elementName, ElementReadCallback& readCallback)
+{
+	m_parser->setElementReadCallback(elementName, readCallback);
+}
+
+/*void File::setElementInserter(std::string elementName, IElementInserter* inserter) 
 {
 	m_parser->setElementInserter(elementName, inserter); 
-}
+}*/
 
 void File::read()
 { 
@@ -148,9 +154,14 @@ void FileParser::readHeader()
 	m_dataOffset = m_lineReader.position(line_substring.end()) + 1;
 }
 
-void FileParser::setElementInserter(std::string elementName, IElementInserter* inserter)
+/*void FileParser::setElementInserter(std::string elementName, IElementInserter* inserter)
 {
 	m_inserterMap[elementName] = inserter;
+}*/
+
+void FileParser::setElementReadCallback(std::string elementName, ElementReadCallback& callback)
+{
+	m_readCallbackMap[elementName] = callback;
 }
 
 void FileParser::read()
@@ -169,8 +180,9 @@ void FileParser::read()
 
 	std::size_t lineIndex = 0;
 	std::size_t elementIndex = 0;
-	IElementInserter* elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
-	PropertyMap properties = elementInserter->properties();
+	//IElementInserter* elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
+	ElementReadCallback readCallback = m_readCallbackMap.at(m_elements.at(elementIndex).name);
+	//PropertyMap properties = elementInserter->properties();
 	auto& elementDefinition = m_elements.at(elementIndex);
 	const std::size_t maxElementIndex = m_elements.size();
 	
@@ -190,9 +202,10 @@ void FileParser::read()
 		if (nextElementIndex < maxElementIndex && lineIndex >= m_elements[nextElementIndex].startLine)
 		{
 			elementIndex = nextElementIndex;
-			elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
+			//elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
+			readCallback = m_readCallbackMap.at(m_elements.at(elementIndex).name);
 			elementDefinition = m_elements.at(elementIndex);
-			properties = elementInserter->properties();
+			//properties = elementInserter->properties();
 
 			buffer = buffers[elementIndex];
 		}
@@ -200,28 +213,29 @@ void FileParser::read()
 		if (m_format == File::Format::ASCII)
 		{
 			auto line = m_lineReader.getline();
-			parseLine(line, elementDefinition, properties, *buffer);
+			parseLine(line, elementDefinition, *buffer);
 		}
 		else {
-			readBinaryElement(filestream, elementDefinition, properties, *buffer);
+			readBinaryElement(filestream, elementDefinition, *buffer);
 		}
 		
-		elementInserter->insert();
+		//elementInserter->insert();
+		readCallback(*buffer);
 		++lineIndex;
 	}
 }
 
-void FileParser::parseLine(const textio::SubString& line, const ElementDefinition& elementDefinition, const PropertyMap& pm, ElementBuffer& elementBuffer)
+void FileParser::parseLine(const textio::SubString& line, const ElementDefinition& elementDefinition, ElementBuffer& elementBuffer)
 {
 	m_lineTokenizer.tokenize(line, m_tokens);
 	const auto& properties = elementDefinition.properties;
 
 	if (!properties.front().isList)
 	{
-		for (auto& kv : pm)
+		for (size_t i = 0; i < elementBuffer.size(); ++i)
 		{
-			auto i = kv.first;
-			properties[i].conversionFunction(m_tokens[i], *kv.second);
+			//auto i = kv.first;
+			//properties[i].conversionFunction(m_tokens[i], *kv.second);
 			properties[i].conversionFunction(m_tokens[i], elementBuffer[i]);
 		}
 	}
@@ -230,16 +244,15 @@ void FileParser::parseLine(const textio::SubString& line, const ElementDefinitio
 		const auto& conversionFunction = properties[0].conversionFunction;
 		size_t listLength = std::stoi(m_tokens[0]);
 		elementBuffer.reset(listLength);
-		for (auto& kv : pm)
+		for (size_t i = 0; i < elementBuffer.size(); ++i)
 		{
-			auto i = kv.first + 1;
-			conversionFunction(m_tokens[i], *kv.second);
-			conversionFunction(m_tokens[i], elementBuffer[i-1]);
+			//conversionFunction(m_tokens[i], *kv.second);
+			conversionFunction(m_tokens[i+1], elementBuffer[i]);
 		}
 	}
 }
 
-void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, const PropertyMap& pm, ElementBuffer& elementBuffer)
+void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& elementDefinition, ElementBuffer& elementBuffer)
 {
 	const auto& properties = elementDefinition.properties;
 	const unsigned int MAX_PROPERTY_SIZE = 8;
@@ -247,12 +260,11 @@ void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& e
 
 	if (!properties.front().isList)
 	{
-		for (auto& kv : pm)
+		for (size_t i = 0; i < elementBuffer.size(); ++i)
 		{
-			auto i = kv.first;
 			const auto size = TYPE_SIZE_MAP.at(properties[i].type);
 			fs.read(buffer, size);
-			properties[i].castFunction(buffer, *kv.second);
+			properties[i].castFunction(buffer, elementBuffer[i]);
 		}
 	}
 	else
@@ -260,13 +272,15 @@ void FileParser::readBinaryElement(std::ifstream& fs, const ElementDefinition& e
 		const auto lengthType = properties[0].listLengthType;
 		const auto lengthTypeSize = TYPE_SIZE_MAP.at(lengthType);
 		fs.read(buffer, lengthTypeSize);
+		size_t length = static_cast<size_t>(*buffer);
+		elementBuffer.reset(length);
 
 		const auto& castFunction = properties[0].castFunction;
 		const auto size = TYPE_SIZE_MAP.at(properties[0].type);
-		for (auto& kv : pm)
+		for (size_t i = 0; i < elementBuffer.size(); ++i)
 		{
 			fs.read(buffer, size);
-			castFunction(buffer, *kv.second);
+			castFunction(buffer, elementBuffer[i]);
 		}
 	}
 }
