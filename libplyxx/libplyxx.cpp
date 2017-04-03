@@ -24,11 +24,6 @@ void File::setElementReadCallback(std::string elementName, ElementReadCallback& 
 	m_parser->setElementReadCallback(elementName, readCallback);
 }
 
-/*void File::setElementInserter(std::string elementName, IElementInserter* inserter) 
-{
-	m_parser->setElementInserter(elementName, inserter); 
-}*/
-
 void File::read()
 { 
 	m_parser->read(); 
@@ -154,11 +149,6 @@ void FileParser::readHeader()
 	m_dataOffset = m_lineReader.position(line_substring.end()) + 1;
 }
 
-/*void FileParser::setElementInserter(std::string elementName, IElementInserter* inserter)
-{
-	m_inserterMap[elementName] = inserter;
-}*/
-
 void FileParser::setElementReadCallback(std::string elementName, ElementReadCallback& callback)
 {
 	m_readCallbackMap[elementName] = callback;
@@ -180,9 +170,7 @@ void FileParser::read()
 
 	std::size_t lineIndex = 0;
 	std::size_t elementIndex = 0;
-	//IElementInserter* elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
 	ElementReadCallback readCallback = m_readCallbackMap.at(m_elements.at(elementIndex).name);
-	//PropertyMap properties = elementInserter->properties();
 	auto& elementDefinition = m_elements.at(elementIndex);
 	const std::size_t maxElementIndex = m_elements.size();
 	
@@ -202,10 +190,8 @@ void FileParser::read()
 		if (nextElementIndex < maxElementIndex && lineIndex >= m_elements[nextElementIndex].startLine)
 		{
 			elementIndex = nextElementIndex;
-			//elementInserter = m_inserterMap.at(m_elements.at(elementIndex).name);
 			readCallback = m_readCallbackMap.at(m_elements.at(elementIndex).name);
 			elementDefinition = m_elements.at(elementIndex);
-			//properties = elementInserter->properties();
 
 			buffer = buffers[elementIndex];
 		}
@@ -219,7 +205,6 @@ void FileParser::read()
 			readBinaryElement(filestream, elementDefinition, *buffer);
 		}
 		
-		//elementInserter->insert();
 		readCallback(*buffer);
 		++lineIndex;
 	}
@@ -234,8 +219,6 @@ void FileParser::parseLine(const textio::SubString& line, const ElementDefinitio
 	{
 		for (size_t i = 0; i < elementBuffer.size(); ++i)
 		{
-			//auto i = kv.first;
-			//properties[i].conversionFunction(m_tokens[i], *kv.second);
 			properties[i].conversionFunction(m_tokens[i], elementBuffer[i]);
 		}
 	}
@@ -246,7 +229,6 @@ void FileParser::parseLine(const textio::SubString& line, const ElementDefinitio
 		elementBuffer.reset(listLength);
 		for (size_t i = 0; i < elementBuffer.size(); ++i)
 		{
-			//conversionFunction(m_tokens[i], *kv.second);
 			conversionFunction(m_tokens[i+1], elementBuffer[i]);
 		}
 	}

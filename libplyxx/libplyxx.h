@@ -84,8 +84,6 @@ namespace libply
 		InternalType m_value;
 	};
 
-	//typedef std::unordered_map<std::size_t, IScalarProperty*> PropertyMap;
-
 	struct ElementDefinition;
 
 	class ElementBuffer
@@ -110,15 +108,6 @@ namespace libply
 		std::vector<std::unique_ptr<IScalarProperty>> properties;
 	};
 
-	/*class IElementInserter
-	{
-	public:
-		virtual PropertyMap properties() = 0;
-		virtual void insert() = 0;
-	};*/
-	
-	typedef std::size_t ElementSize;
-
 	struct Property
 	{
 		Property(const std::string& name, Type type, bool isList)
@@ -128,6 +117,8 @@ namespace libply
 		Type type;
 		bool isList;
 	};
+
+	typedef std::size_t ElementSize;
 
 	struct Element
 	{
@@ -139,7 +130,6 @@ namespace libply
 		std::vector<Property> properties;
 	};
 
-	//typedef void(*ElementReadCallback)(ElementBuffer& buffer);
 	typedef std::function< void(ElementBuffer&) > ElementReadCallback;
 
 	class FileParser;
@@ -151,7 +141,6 @@ namespace libply
 		~File();
 
 		std::vector<Element> definitions() const;
-		//void setElementInserter(std::string elementName, IElementInserter* inserter);
 		void setElementReadCallback(std::string elementName, ElementReadCallback& readCallback);
 		void read();
 
