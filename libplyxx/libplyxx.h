@@ -134,13 +134,15 @@ namespace libply
 
 	class FileParser;
 
+	typedef std::vector<Element> ElementsDefinition;
+
 	class File
 	{
 	public:
 		File(const std::wstring& filename);
 		~File();
 
-		std::vector<Element> definitions() const;
+		ElementsDefinition definitions() const;
 		void setElementReadCallback(std::string elementName, ElementReadCallback& readCallback);
 		void read();
 
@@ -155,5 +157,27 @@ namespace libply
 	private:
 		std::wstring m_filename;
 		std::unique_ptr<FileParser> m_parser;
+	};
+
+	typedef std::function< void(ElementBuffer&) > ElementWriteCallback;
+
+	class FileOut
+	{
+	public:
+		FileOut(const std::wstring& filename, File::Format format);
+		
+		void setElementsDefinition(const ElementsDefinition& definitions);
+		void setElementWriteCallback(std::string elementName, ElementWriteCallback writeCallback);
+		void write();
+
+	private:
+		void createFile();
+		void writeHeader();
+		void writeData();
+
+	private:
+		std::wstring m_filename;
+		File::Format m_format;
+		ElementsDefinition m_definitions;
 	};
 }

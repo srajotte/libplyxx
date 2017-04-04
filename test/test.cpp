@@ -32,9 +32,6 @@ struct Mesh
 void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles)
 {
 	libply::File file(filename);
-
-	int temp = 1;
-
 	const auto& definitions = file.definitions();
 
 	const auto vertexDefinition = definitions.at(0);
@@ -56,6 +53,25 @@ void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIn
 	file.setElementReadCallback("vertex", vertexCallback);
 	file.setElementReadCallback("face", triangleCallback);
 	file.read();
+}
+
+void writeply(std::wstring filename, libply::ElementsDefinition& definitions, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles)
+{
+	libply::FileOut file(filename, libply::File::Format::ASCII);
+	file.setElementsDefinition(definitions);
+	
+	libply::ElementWriteCallback vertexCallback = [&vertices](libply::ElementBuffer& e)
+		{
+		
+		};
+	libply::ElementWriteCallback triangleCallback = [&triangles](libply::ElementBuffer& e)
+		{
+
+		};
+
+	file.setElementWriteCallback("vertex", vertexCallback);
+	file.setElementWriteCallback("face", vertexCallback);
+	file.write();
 }
 
 bool compare_vertices(const Mesh::VertexList& left, const Mesh::VertexList& right)
@@ -110,4 +126,7 @@ int main()
 
 	compare_vertices(ascii_vertices, bin_vertices);
 	compare_triangles(ascii_triangles, bin_triangles);
+
+	libply::File refFile(L"../test/data/test.ply");
+	writeply(L"../test/results/write_ascii.ply", refFile.definitions(), ascii_vertices, ascii_triangles);
 }

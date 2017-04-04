@@ -330,4 +330,39 @@ std::unique_ptr<IScalarProperty> ElementBuffer::getScalarProperty(Type type)
 	return std::move(prop);
 }
 
+FileOut::FileOut(const std::wstring& filename, File::Format format)
+{
+
+}
+
+void FileOut::setElementsDefinition(const ElementsDefinition& definitions)
+{
+
+}
+
+void FileOut::setElementWriteCallback(std::string elementName, ElementWriteCallback writeCallback)
+{
+
+}
+
+void FileOut::write()
+{
+	
+}
+
+void FileOut::createFile()
+{
+
+}
+
+void FileOut::writeHeader()
+{
+
+}
+
+void FileOut::writeData()
+{
+
+}
+
 }
