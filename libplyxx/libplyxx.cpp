@@ -375,6 +375,40 @@ void writeElementDefinition(std::ofstream& file, const Element& elementDefinitio
 	}
 }
 
+void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, const Element& elementDefinition, ElementWriteCallback& callback)
+{
+	callback(buffer, index);
+	if (elementDefinition.properties.front().isList)
+	{
+		file << buffer.size() << " ";
+		for (size_t i = 0; i < buffer.size(); ++i)
+		{
+			// @TODO : generalize cast to all PLY types;
+			file << static_cast<unsigned int>(buffer[i]) << " ";
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < buffer.size(); ++i)
+		{
+			// @TODO : generalize cast to all PLY types;
+			file << static_cast<float>(buffer[i]) << " ";
+		}
+	}
+	file << std::endl;
+}
+
+void writeElements(std::ofstream& file, const Element& elementDefinition, ElementWriteCallback& callback)
+{
+	const size_t size = elementDefinition.size;
+	ElementBuffer buffer(elementDefinition);
+	buffer.reset(elementDefinition.properties.size());
+	for (size_t i = 0; i < size; ++i)
+	{
+		writeProperties(file, buffer, i, elementDefinition, callback);
+	}
+}
+
 FileOut::FileOut(const std::wstring& filename, File::Format format)
 	: m_filename(filename), m_format(format)
 {
@@ -386,9 +420,9 @@ void FileOut::setElementsDefinition(const ElementsDefinition& definitions)
 	m_definitions = definitions;
 }
 
-void FileOut::setElementWriteCallback(std::string elementName, ElementWriteCallback writeCallback)
+void FileOut::setElementWriteCallback(const std::string& elementName, ElementWriteCallback& writeCallback)
 {
-
+	m_writeCallbacks[elementName] = writeCallback;
 }
 
 void FileOut::write()
@@ -400,6 +434,7 @@ void FileOut::write()
 void FileOut::createFile()
 {
 	std::ofstream f(m_filename, std::ios::trunc);
+	f.close();
 }
 
 void FileOut::writeHeader()
@@ -408,18 +443,23 @@ void FileOut::writeHeader()
 
 	file << "ply" << std::endl;
 	file << "format " << formatString(m_format) << " 1.0" << std::endl;
-
 	for (const auto& def : m_definitions)
 	{
 		writeElementDefinition(file, def);
 	}
-
 	file << "end_header" << std::endl;
+
+	file.close();
 }
 
 void FileOut::writeData()
 {
-
+	std::ofstream file(m_filename, std::ios::out | std::ios::binary | std::ios::app);
+	for (const auto& elem : m_definitions)
+	{
+		writeElements(file, elem, m_writeCallbacks[elem.name]);
+	}
+	file.close();
 }
 
 }

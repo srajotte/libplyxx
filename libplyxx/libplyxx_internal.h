@@ -95,6 +95,9 @@ namespace libply
 			conversionFunction(CONVERSION_MAP.at(type)),
 			castFunction(CAST_MAP.at(type))
 		{};
+		PropertyDefinition(const Property& p)
+			: PropertyDefinition(p.name, p.type, p.isList)
+		{};
 
 		Property getProperty() const;
 
@@ -111,6 +114,14 @@ namespace libply
 		ElementDefinition() : ElementDefinition("", 0, 0) {};
 		ElementDefinition(const std::string& name, ElementSize size, std::size_t startLine)
 			: name(name), size(size), startLine(startLine) {};
+		ElementDefinition(const Element& e)
+			: name(e.name), size(e.size)
+		{
+			for (const auto& p : e.properties)
+			{
+				properties.emplace_back(p);
+			}
+		};
 
 		Element getElement() const;
 

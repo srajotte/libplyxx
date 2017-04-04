@@ -60,17 +60,24 @@ void writeply(std::wstring filename, libply::ElementsDefinition& definitions, Me
 	libply::FileOut file(filename, libply::File::Format::ASCII);
 	file.setElementsDefinition(definitions);
 	
-	libply::ElementWriteCallback vertexCallback = [&vertices](libply::ElementBuffer& e)
+	libply::ElementWriteCallback vertexCallback = [&vertices](libply::ElementBuffer& e, size_t index)
 		{
-		
+			const auto& v = vertices[index];
+			e[0] = v.x;
+			e[1] = v.y;
+			e[2] = v.z;
 		};
-	libply::ElementWriteCallback triangleCallback = [&triangles](libply::ElementBuffer& e)
+	libply::ElementWriteCallback triangleCallback = [&triangles](libply::ElementBuffer& e, size_t index)
 		{
-
+			e.reset(3);
+			const auto& t = triangles[index];
+			e[0] = t[0];
+			e[1] = t[1];
+			e[2] = t[2];
 		};
 
 	file.setElementWriteCallback("vertex", vertexCallback);
-	file.setElementWriteCallback("face", vertexCallback);
+	file.setElementWriteCallback("face", triangleCallback);
 	file.write();
 }
 

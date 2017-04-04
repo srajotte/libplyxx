@@ -159,7 +159,7 @@ namespace libply
 		std::unique_ptr<FileParser> m_parser;
 	};
 
-	typedef std::function< void(ElementBuffer&) > ElementWriteCallback;
+	typedef std::function< void(ElementBuffer&, size_t index) > ElementWriteCallback;
 
 	class FileOut
 	{
@@ -167,7 +167,7 @@ namespace libply
 		FileOut(const std::wstring& filename, File::Format format);
 		
 		void setElementsDefinition(const ElementsDefinition& definitions);
-		void setElementWriteCallback(std::string elementName, ElementWriteCallback writeCallback);
+		void setElementWriteCallback(const std::string& elementName, ElementWriteCallback& writeCallback);
 		void write();
 
 	private:
@@ -179,5 +179,6 @@ namespace libply
 		std::wstring m_filename;
 		File::Format m_format;
 		ElementsDefinition m_definitions;
+		std::map<std::string, ElementWriteCallback> m_writeCallbacks;
 	};
 }
