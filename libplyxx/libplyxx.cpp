@@ -330,14 +330,60 @@ std::unique_ptr<IScalarProperty> ElementBuffer::getScalarProperty(Type type)
 	return std::move(prop);
 }
 
-FileOut::FileOut(const std::wstring& filename, File::Format format)
+std::string formatString(File::Format format)
 {
+	switch (format)
+	{
+	case File::Format::ASCII: return "ascii";
+	case File::Format::BINARY_BIG_ENDIAN: return "binary_big_endian";
+	case File::Format::BINARY_LITTLE_ENDIAN: return "binary_little_endian";
+	}
+	return "";
+}
 
+std::string typeString(Type type)
+{
+	switch (type)
+	{
+	case Type::UCHAR: return "uchar";
+	case Type::INT: return "int";
+	case Type::FLOAT: return "float";
+	case Type::DOUBLE: return "double";
+	}
+	return "";
+}
+
+void writePropertyDefinition(std::ofstream& file, const Property& propertyDefinition)
+{
+	if (propertyDefinition.isList)
+	{
+		file << "property list uchar ";
+	}
+	else
+	{
+		file << "property ";
+	}
+	file << typeString(propertyDefinition.type) << " " << propertyDefinition.name << std::endl;
+}
+
+void writeElementDefinition(std::ofstream& file, const Element& elementDefinition)
+{
+	file << "element " << elementDefinition.name << " " << elementDefinition.size << std::endl;
+	for (const auto& prop : elementDefinition.properties)
+	{
+		writePropertyDefinition(file, prop);
+	}
+}
+
+FileOut::FileOut(const std::wstring& filename, File::Format format)
+	: m_filename(filename), m_format(format)
+{
+	createFile();
 }
 
 void FileOut::setElementsDefinition(const ElementsDefinition& definitions)
 {
-
+	m_definitions = definitions;
 }
 
 void FileOut::setElementWriteCallback(std::string elementName, ElementWriteCallback writeCallback)
@@ -347,17 +393,28 @@ void FileOut::setElementWriteCallback(std::string elementName, ElementWriteCallb
 
 void FileOut::write()
 {
-	
+	writeHeader();
+	writeData();
 }
 
 void FileOut::createFile()
 {
-
+	std::ofstream f(m_filename, std::ios::trunc);
 }
 
 void FileOut::writeHeader()
 {
+	std::ofstream file(m_filename, std::ios::out | std::ios::binary);
 
+	file << "ply" << std::endl;
+	file << "format " << formatString(m_format) << " 1.0" << std::endl;
+
+	for (const auto& def : m_definitions)
+	{
+		writeElementDefinition(file, def);
+	}
+
+	file << "end_header" << std::endl;
 }
 
 void FileOut::writeData()

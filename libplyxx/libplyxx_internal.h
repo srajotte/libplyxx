@@ -150,4 +150,7 @@ namespace libply
 		std::vector<ElementDefinition> m_elements;
 		CallbackMap m_readCallbackMap;
 	};
+
+	std::string formatString(File::Format format);
+	std::string typeString(Type type);
 }
