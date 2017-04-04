@@ -375,24 +375,29 @@ void writeElementDefinition(std::ofstream& file, const Element& elementDefinitio
 	}
 }
 
-void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, const Element& elementDefinition, ElementWriteCallback& callback)
+void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, const ElementDefinition& elementDefinition, ElementWriteCallback& callback)
 {
 	callback(buffer, index);
+	std::stringstream ss;
 	if (elementDefinition.properties.front().isList)
 	{
 		file << buffer.size() << " ";
+		auto& cast = elementDefinition.properties.front().writeCastFunction;
 		for (size_t i = 0; i < buffer.size(); ++i)
 		{
-			// @TODO : generalize cast to all PLY types;
-			file << static_cast<unsigned int>(buffer[i]) << " ";
+			ss.clear();
+			ss.str(std::string());
+			file << cast(buffer[i], ss).str() << " ";
 		}
 	}
 	else
 	{
 		for (size_t i = 0; i < buffer.size(); ++i)
 		{
-			// @TODO : generalize cast to all PLY types;
-			file << static_cast<float>(buffer[i]) << " ";
+			auto& cast = elementDefinition.properties.at(i).writeCastFunction;
+			ss.clear();
+			ss.str(std::string());
+			file << cast(buffer[i], ss).str() << " ";
 		}
 	}
 	file << std::endl;

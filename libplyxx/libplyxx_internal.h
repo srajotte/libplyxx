@@ -1,6 +1,7 @@
 #pragma once
 
 #include "libplyxx.h"
+#include <sstream>
 
 namespace libply
 {
@@ -88,12 +89,48 @@ namespace libply
 		{ Type::DOUBLE, cast_DOUBLE }
 	};
 
+	inline std::stringstream& write_cast_UCHAR(IScalarProperty& property, std::stringstream& ss)
+	{
+		ss << unsigned int(property);
+		return ss;
+	}
+
+	inline std::stringstream& write_cast_INT(IScalarProperty& property, std::stringstream& ss)
+	{
+		ss << int(property);
+		return ss;
+	}
+
+	inline std::stringstream& write_cast_FLOAT(IScalarProperty& property, std::stringstream& ss)
+	{
+		ss << float(property);
+		return ss;
+	}
+
+	inline std::stringstream& write_cast_DOUBLE(IScalarProperty& property, std::stringstream& ss)
+	{
+		ss << double(property);
+		return ss;
+	}
+
+	typedef std::stringstream&(*WriteCastFunction)(IScalarProperty&, std::stringstream&);
+	typedef std::unordered_map<Type, WriteCastFunction> WriteCastFunctionMap;
+
+	const WriteCastFunctionMap WRITE_CAST_MAP =
+	{
+		{ Type::UCHAR , write_cast_UCHAR },
+		{ Type::INT, write_cast_INT },
+		{ Type::FLOAT, write_cast_FLOAT },
+		{ Type::DOUBLE, write_cast_DOUBLE }
+	};
+
 	struct PropertyDefinition
 	{
 		PropertyDefinition(const std::string& name, Type type, bool isList, Type listLengthType = Type::UCHAR)
 			: name(name), type(type), isList(isList), listLengthType(listLengthType),
 			conversionFunction(CONVERSION_MAP.at(type)),
-			castFunction(CAST_MAP.at(type))
+			castFunction(CAST_MAP.at(type)),
+			writeCastFunction(WRITE_CAST_MAP.at(type))
 		{};
 		PropertyDefinition(const Property& p)
 			: PropertyDefinition(p.name, p.type, p.isList)
@@ -107,6 +144,7 @@ namespace libply
 		Type listLengthType;
 		ConversionFunction conversionFunction;
 		CastFunction castFunction;
+		WriteCastFunction writeCastFunction;
 	};
 
 	struct ElementDefinition
