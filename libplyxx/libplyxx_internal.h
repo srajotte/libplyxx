@@ -124,13 +124,49 @@ namespace libply
 		{ Type::DOUBLE, write_convert_DOUBLE }
 	};
 
+	inline void write_cast_UCHAR(IScalarProperty& property, char* buffer, size_t& size)
+	{
+		*reinterpret_cast<unsigned char*>(buffer) = unsigned int(property);
+		size = sizeof(unsigned char);
+	}
+
+	inline void write_cast_INT(IScalarProperty& property, char* buffer, size_t& size)
+	{
+		*reinterpret_cast<int*>(buffer) = int(property);
+		size = sizeof(int);
+	}
+
+	inline void write_cast_FLOAT(IScalarProperty& property, char* buffer, size_t& size)
+	{
+		*reinterpret_cast<float*>(buffer) = float(property);
+		size = sizeof(float);
+	}
+
+	inline void write_cast_DOUBLE(IScalarProperty& property, char* buffer, size_t& size)
+	{
+		*reinterpret_cast<double*>(buffer) = double(property);
+		size = sizeof(double);
+	}
+
+	typedef void(*WriteCastFunction)(IScalarProperty& property, char* buffer, size_t& size);
+	typedef std::unordered_map<Type, WriteCastFunction> WriteCastFunctionMap;
+
+	const WriteCastFunctionMap WRITE_CAST_MAP =
+	{
+		{ Type::UCHAR , write_cast_UCHAR },
+		{ Type::INT, write_cast_INT },
+		{ Type::FLOAT, write_cast_FLOAT },
+		{ Type::DOUBLE, write_cast_DOUBLE }
+	};
+
 	struct PropertyDefinition
 	{
 		PropertyDefinition(const std::string& name, Type type, bool isList, Type listLengthType = Type::UCHAR)
 			: name(name), type(type), isList(isList), listLengthType(listLengthType),
 			conversionFunction(CONVERSION_MAP.at(type)),
 			castFunction(CAST_MAP.at(type)),
-			writeConvertFunction(WRITE_CONVERT_MAP.at(type))
+			writeConvertFunction(WRITE_CONVERT_MAP.at(type)),
+			writeCastFunction(WRITE_CAST_MAP.at(type))
 		{};
 		PropertyDefinition(const Property& p)
 			: PropertyDefinition(p.name, p.type, p.isList)
@@ -145,6 +181,7 @@ namespace libply
 		ConversionFunction conversionFunction;
 		CastFunction castFunction;
 		WriteConvertFunction writeConvertFunction;
+		WriteCastFunction writeCastFunction;
 	};
 
 	struct ElementDefinition

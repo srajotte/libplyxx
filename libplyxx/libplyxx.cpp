@@ -404,7 +404,29 @@ void writeTextProperties(std::ofstream& file, ElementBuffer& buffer, const Eleme
 
 void writeBinaryProperties(std::ofstream& file, ElementBuffer& buffer, const ElementDefinition& elementDefinition)
 {
-
+	char cast_buffer[8];
+	/*if (elementDefinition.properties.front().isList)
+	{
+		file << buffer.size() << " ";
+		auto& convert = elementDefinition.properties.front().writeConvertFunction;
+		for (size_t i = 0; i < buffer.size(); ++i)
+		{
+			ss.clear();
+			ss.str(std::string());
+			file << convert(buffer[i], ss).str() << " ";
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < buffer.size(); ++i)
+		{
+			auto& convert = elementDefinition.properties.at(i).writeConvertFunction;
+			ss.clear();
+			ss.str(std::string());
+			file << convert(buffer[i], ss).str() << " ";
+		}
+	}
+	file << '\n';*/
 }
 
 void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, const ElementDefinition& elementDefinition, File::Format format, ElementWriteCallback& callback)
