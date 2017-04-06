@@ -89,39 +89,39 @@ namespace libply
 		{ Type::DOUBLE, cast_DOUBLE }
 	};
 
-	inline std::stringstream& write_cast_UCHAR(IScalarProperty& property, std::stringstream& ss)
+	inline std::stringstream& write_convert_UCHAR(IScalarProperty& property, std::stringstream& ss)
 	{
 		ss << unsigned int(property);
 		return ss;
 	}
 
-	inline std::stringstream& write_cast_INT(IScalarProperty& property, std::stringstream& ss)
+	inline std::stringstream& write_convert_INT(IScalarProperty& property, std::stringstream& ss)
 	{
 		ss << int(property);
 		return ss;
 	}
 
-	inline std::stringstream& write_cast_FLOAT(IScalarProperty& property, std::stringstream& ss)
+	inline std::stringstream& write_convert_FLOAT(IScalarProperty& property, std::stringstream& ss)
 	{
 		ss << float(property);
 		return ss;
 	}
 
-	inline std::stringstream& write_cast_DOUBLE(IScalarProperty& property, std::stringstream& ss)
+	inline std::stringstream& write_convert_DOUBLE(IScalarProperty& property, std::stringstream& ss)
 	{
 		ss << double(property);
 		return ss;
 	}
 
-	typedef std::stringstream&(*WriteCastFunction)(IScalarProperty&, std::stringstream&);
-	typedef std::unordered_map<Type, WriteCastFunction> WriteCastFunctionMap;
+	typedef std::stringstream&(*WriteConvertFunction)(IScalarProperty&, std::stringstream&);
+	typedef std::unordered_map<Type, WriteConvertFunction> WriteConvertFunctionMap;
 
-	const WriteCastFunctionMap WRITE_CAST_MAP =
+	const WriteConvertFunctionMap WRITE_CONVERT_MAP =
 	{
-		{ Type::UCHAR , write_cast_UCHAR },
-		{ Type::INT, write_cast_INT },
-		{ Type::FLOAT, write_cast_FLOAT },
-		{ Type::DOUBLE, write_cast_DOUBLE }
+		{ Type::UCHAR , write_convert_UCHAR },
+		{ Type::INT, write_convert_INT },
+		{ Type::FLOAT, write_convert_FLOAT },
+		{ Type::DOUBLE, write_convert_DOUBLE }
 	};
 
 	struct PropertyDefinition
@@ -130,7 +130,7 @@ namespace libply
 			: name(name), type(type), isList(isList), listLengthType(listLengthType),
 			conversionFunction(CONVERSION_MAP.at(type)),
 			castFunction(CAST_MAP.at(type)),
-			writeCastFunction(WRITE_CAST_MAP.at(type))
+			writeConvertFunction(WRITE_CONVERT_MAP.at(type))
 		{};
 		PropertyDefinition(const Property& p)
 			: PropertyDefinition(p.name, p.type, p.isList)
@@ -144,7 +144,7 @@ namespace libply
 		Type listLengthType;
 		ConversionFunction conversionFunction;
 		CastFunction castFunction;
-		WriteCastFunction writeCastFunction;
+		WriteConvertFunction writeConvertFunction;
 	};
 
 	struct ElementDefinition

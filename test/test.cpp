@@ -55,9 +55,9 @@ void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIn
 	file.read();
 }
 
-void writeply(std::wstring filename, libply::ElementsDefinition& definitions, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles)
+void writeply(std::wstring filename, libply::ElementsDefinition& definitions, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles, libply::File::Format format)
 {
-	libply::FileOut file(filename, libply::File::Format::ASCII);
+	libply::FileOut file(filename, format);
 	file.setElementsDefinition(definitions);
 	
 	libply::ElementWriteCallback vertexCallback = [&vertices](libply::ElementBuffer& e, size_t index)
@@ -135,5 +135,6 @@ int main()
 	compare_triangles(ascii_triangles, bin_triangles);
 
 	libply::File refFile(L"../test/data/test.ply");
-	writeply(L"../test/results/write_ascii.ply", refFile.definitions(), ascii_vertices, ascii_triangles);
+	writeply(L"../test/results/write_ascii.ply", refFile.definitions(), ascii_vertices, ascii_triangles, libply::File::Format::ASCII);
+	writeply(L"../test/results/write_bin.ply", refFile.definitions(), ascii_vertices, ascii_triangles, libply::File::Format::BINARY_LITTLE_ENDIAN);
 }

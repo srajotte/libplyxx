@@ -382,22 +382,22 @@ void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, c
 	if (elementDefinition.properties.front().isList)
 	{
 		file << buffer.size() << " ";
-		auto& cast = elementDefinition.properties.front().writeCastFunction;
+		auto& convert = elementDefinition.properties.front().writeConvertFunction;
 		for (size_t i = 0; i < buffer.size(); ++i)
 		{
 			ss.clear();
 			ss.str(std::string());
-			file << cast(buffer[i], ss).str() << " ";
+			file << convert(buffer[i], ss).str() << " ";
 		}
 	}
 	else
 	{
 		for (size_t i = 0; i < buffer.size(); ++i)
 		{
-			auto& cast = elementDefinition.properties.at(i).writeCastFunction;
+			auto& convert = elementDefinition.properties.at(i).writeConvertFunction;
 			ss.clear();
 			ss.str(std::string());
-			file << cast(buffer[i], ss).str() << " ";
+			file << convert(buffer[i], ss).str() << " ";
 		}
 	}
 	file << std::endl;
