@@ -375,9 +375,8 @@ void writeElementDefinition(std::ofstream& file, const Element& elementDefinitio
 	}
 }
 
-void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, const ElementDefinition& elementDefinition, ElementWriteCallback& callback)
+void writeTextProperties(std::ofstream& file, ElementBuffer& buffer, const ElementDefinition& elementDefinition)
 {
-	callback(buffer, index);
 	std::stringstream ss;
 	if (elementDefinition.properties.front().isList)
 	{
@@ -403,14 +402,32 @@ void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, c
 	file << '\n';
 }
 
-void writeElements(std::ofstream& file, const Element& elementDefinition, ElementWriteCallback& callback)
+void writeBinaryProperties(std::ofstream& file, ElementBuffer& buffer, const ElementDefinition& elementDefinition)
+{
+
+}
+
+void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, const ElementDefinition& elementDefinition, File::Format format, ElementWriteCallback& callback)
+{
+	callback(buffer, index);
+	if (format == File::Format::ASCII)
+	{
+		writeTextProperties(file, buffer, elementDefinition);
+	}
+	else
+	{
+		writeBinaryProperties(file, buffer, elementDefinition);
+	}
+}
+
+void writeElements(std::ofstream& file, const Element& elementDefinition, File::Format format, ElementWriteCallback& callback)
 {
 	const size_t size = elementDefinition.size;
 	ElementBuffer buffer(elementDefinition);
 	buffer.reset(elementDefinition.properties.size());
 	for (size_t i = 0; i < size; ++i)
 	{
-		writeProperties(file, buffer, i, elementDefinition, callback);
+		writeProperties(file, buffer, i, elementDefinition, format, callback);
 	}
 }
 
@@ -462,7 +479,7 @@ void FileOut::writeData()
 	std::ofstream file(m_filename, std::ios::out | std::ios::binary | std::ios::app);
 	for (const auto& elem : m_definitions)
 	{
-		writeElements(file, elem, m_writeCallbacks[elem.name]);
+		writeElements(file, elem, m_format, m_writeCallbacks[elem.name]);
 	}
 	file.close();
 }
