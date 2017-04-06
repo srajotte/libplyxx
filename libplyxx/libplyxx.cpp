@@ -363,12 +363,12 @@ void writePropertyDefinition(std::ofstream& file, const Property& propertyDefini
 	{
 		file << "property ";
 	}
-	file << typeString(propertyDefinition.type) << " " << propertyDefinition.name << std::endl;
+	file << typeString(propertyDefinition.type) << " " << propertyDefinition.name << '\n';
 }
 
 void writeElementDefinition(std::ofstream& file, const Element& elementDefinition)
 {
-	file << "element " << elementDefinition.name << " " << elementDefinition.size << std::endl;
+	file << "element " << elementDefinition.name << " " << elementDefinition.size << '\n';
 	for (const auto& prop : elementDefinition.properties)
 	{
 		writePropertyDefinition(file, prop);
@@ -400,7 +400,7 @@ void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, c
 			file << convert(buffer[i], ss).str() << " ";
 		}
 	}
-	file << std::endl;
+	file << '\n';
 }
 
 void writeElements(std::ofstream& file, const Element& elementDefinition, ElementWriteCallback& callback)
