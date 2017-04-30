@@ -404,29 +404,32 @@ void writeTextProperties(std::ofstream& file, ElementBuffer& buffer, const Eleme
 
 void writeBinaryProperties(std::ofstream& file, ElementBuffer& buffer, const ElementDefinition& elementDefinition)
 {
-	char cast_buffer[8];
-	/*if (elementDefinition.properties.front().isList)
+	const unsigned int MAX_PROPERTY_SIZE = 8;
+	char write_buffer[MAX_PROPERTY_SIZE];
+
+	if (elementDefinition.properties.front().isList)
 	{
-		file << buffer.size() << " ";
-		auto& convert = elementDefinition.properties.front().writeConvertFunction;
+		unsigned char list_size = static_cast<unsigned char>(buffer.size());
+		file.write(reinterpret_cast<char*>(&list_size), sizeof(list_size));
+
+		auto& cast = elementDefinition.properties.front().writeCastFunction;
 		for (size_t i = 0; i < buffer.size(); ++i)
 		{
-			ss.clear();
-			ss.str(std::string());
-			file << convert(buffer[i], ss).str() << " ";
+			size_t write_size;
+			cast(buffer[i], write_buffer, write_size);
+			file.write(reinterpret_cast<char*>(write_buffer), write_size);
 		}
 	}
 	else
 	{
 		for (size_t i = 0; i < buffer.size(); ++i)
 		{
-			auto& convert = elementDefinition.properties.at(i).writeConvertFunction;
-			ss.clear();
-			ss.str(std::string());
-			file << convert(buffer[i], ss).str() << " ";
+			auto& cast = elementDefinition.properties.at(i).writeCastFunction;
+			size_t write_size;
+			cast(buffer[i], write_buffer, write_size);
+			file.write(reinterpret_cast<char*>(write_buffer), write_size);
 		}
 	}
-	file << '\n';*/
 }
 
 void writeProperties(std::ofstream& file, ElementBuffer& buffer, size_t index, const ElementDefinition& elementDefinition, File::Format format, ElementWriteCallback& callback)
