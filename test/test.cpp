@@ -137,4 +137,16 @@ int main()
 	libply::File refFile(L"../test/data/test.ply");
 	writeply(L"../test/results/write_ascii.ply", refFile.definitions(), ascii_vertices, ascii_triangles, libply::File::Format::ASCII);
 	writeply(L"../test/results/write_bin.ply", refFile.definitions(), ascii_vertices, ascii_triangles, libply::File::Format::BINARY_LITTLE_ENDIAN);
+
+	Mesh::VertexList readback_ascii_vertices;
+	Mesh::TriangleIndicesList readback_ascii_triangles;
+	readply(L"../test/results/write_ascii.ply", readback_ascii_vertices, readback_ascii_triangles);
+	compare_vertices(ascii_vertices, readback_ascii_vertices);
+	compare_triangles(ascii_triangles, readback_ascii_triangles);
+
+	Mesh::VertexList readback_bin_vertices;
+	Mesh::TriangleIndicesList readback_bin_triangles;
+	readply(L"../test/results/write_bin.ply", readback_bin_vertices, readback_bin_triangles);
+	compare_vertices(bin_vertices, readback_bin_vertices);
+	compare_triangles(bin_triangles, readback_bin_triangles);
 }
