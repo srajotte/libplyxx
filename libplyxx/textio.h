@@ -133,7 +133,7 @@ namespace textio
 	template<typename T>
 	T stor(const std::string& str)
 	{
-		return stof<T>(SubString(str.cbegin(), str.cend()));
+		return stor<T>(SubString(str.cbegin(), str.cend()));
 	}
 
 	// Convert string to unsigned type.
