@@ -278,7 +278,7 @@ namespace textio
 	LineReader::LineReader(const PathString& filename, bool textMode)
 		: m_workBufSize(1 * 1024 * 1024), m_eof(false), m_workBufFileEndPosition(0)
 	{
-		auto mode = std::fstream::in;
+		std::ios_base::openmode mode = std::fstream::in;
 		if (!textMode) { mode |= std::fstream::binary; }
 		m_file.open(filename, mode);
 		if (!m_file.is_open())
