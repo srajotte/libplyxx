@@ -13,8 +13,10 @@
 
 #ifdef _WIN32
     #define PATH_STRING std::wstring
+    #define Str(s) L##s
 #else
     #define PATH_STRING std::string
+    #define Str(s) s
 #endif
 
 namespace libply
