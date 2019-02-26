@@ -91,25 +91,25 @@ namespace libply
 
 	inline std::stringstream& write_convert_UCHAR(IScalarProperty& property, std::stringstream& ss)
 	{
-		ss << unsigned int(property);
+		ss << static_cast<unsigned int>(property);
 		return ss;
 	}
 
 	inline std::stringstream& write_convert_INT(IScalarProperty& property, std::stringstream& ss)
 	{
-		ss << int(property);
+		ss << static_cast<int>(property);
 		return ss;
 	}
 
 	inline std::stringstream& write_convert_FLOAT(IScalarProperty& property, std::stringstream& ss)
 	{
-		ss << float(property);
+		ss << static_cast<float>(property);
 		return ss;
 	}
 
 	inline std::stringstream& write_convert_DOUBLE(IScalarProperty& property, std::stringstream& ss)
 	{
-		ss << double(property);
+		ss << static_cast<double>(property);
 		return ss;
 	}
 
@@ -126,25 +126,25 @@ namespace libply
 
 	inline void write_cast_UCHAR(IScalarProperty& property, char* buffer, size_t& size)
 	{
-		*reinterpret_cast<unsigned char*>(buffer) = unsigned int(property);
+		*reinterpret_cast<unsigned char*>(buffer) = static_cast<unsigned int>(property);
 		size = sizeof(unsigned char);
 	}
 
 	inline void write_cast_INT(IScalarProperty& property, char* buffer, size_t& size)
 	{
-		*reinterpret_cast<int*>(buffer) = int(property);
+		*reinterpret_cast<int*>(buffer) = static_cast<int>(property);
 		size = sizeof(int);
 	}
 
 	inline void write_cast_FLOAT(IScalarProperty& property, char* buffer, size_t& size)
 	{
-		*reinterpret_cast<float*>(buffer) = float(property);
+		*reinterpret_cast<float*>(buffer) = static_cast<float>(property);
 		size = sizeof(float);
 	}
 
 	inline void write_cast_DOUBLE(IScalarProperty& property, char* buffer, size_t& size)
 	{
-		*reinterpret_cast<double*>(buffer) = double(property);
+		*reinterpret_cast<double*>(buffer) = static_cast<double>(property);
 		size = sizeof(double);
 	}
 
@@ -209,7 +209,7 @@ namespace libply
 	class FileParser
 	{
 	public:
-		explicit FileParser(const std::wstring& filename);
+		explicit FileParser(const PATH_STRING& filename);
 		FileParser(const FileParser& other) = delete;
 		~FileParser();
 		
@@ -227,7 +227,7 @@ namespace libply
 		typedef std::map<std::string, ElementReadCallback> CallbackMap;
 
 	private:
-		std::wstring m_filename;
+		PATH_STRING m_filename;
 		File::Format m_format;
 		std::streamsize m_dataOffset;
 		textio::LineReader m_lineReader;

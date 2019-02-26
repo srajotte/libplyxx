@@ -29,7 +29,7 @@ struct Mesh
 	TriangleIndicesList triangles;
 };
 
-void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles)
+void readply(PATH_STRING filename, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles)
 {
 	libply::File file(filename);
 	const auto& definitions = file.definitions();
@@ -55,7 +55,7 @@ void readply(std::wstring filename, Mesh::VertexList& vertices, Mesh::TriangleIn
 	file.read();
 }
 
-void writeply(std::wstring filename, libply::ElementsDefinition& definitions, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles, libply::File::Format format)
+void writeply(PATH_STRING filename, const libply::ElementsDefinition& definitions, Mesh::VertexList& vertices, Mesh::TriangleIndicesList& triangles, libply::File::Format format)
 {
 	libply::FileOut file(filename, format);
 	file.setElementsDefinition(definitions);
@@ -125,28 +125,28 @@ int main()
 {
 	Mesh::VertexList ascii_vertices;
 	Mesh::TriangleIndicesList ascii_triangles;
-	readply(L"../test/data/test.ply", ascii_vertices, ascii_triangles);
+	readply("../test/data/test.ply", ascii_vertices, ascii_triangles);
 
 	Mesh::VertexList bin_vertices;
 	Mesh::TriangleIndicesList bin_triangles;
-	readply(L"../test/data/test_bin.ply", bin_vertices, bin_triangles);
+	readply("../test/data/test_bin.ply", bin_vertices, bin_triangles);
 
 	compare_vertices(ascii_vertices, bin_vertices);
 	compare_triangles(ascii_triangles, bin_triangles);
 
-	libply::File refFile(L"../test/data/test.ply");
-	writeply(L"../test/results/write_ascii.ply", refFile.definitions(), ascii_vertices, ascii_triangles, libply::File::Format::ASCII);
-	writeply(L"../test/results/write_bin.ply", refFile.definitions(), ascii_vertices, ascii_triangles, libply::File::Format::BINARY_LITTLE_ENDIAN);
+	libply::File refFile("../test/data/test.ply");
+	writeply("../test/results/write_ascii.ply", refFile.definitions(), ascii_vertices, ascii_triangles, libply::File::Format::ASCII);
+	writeply("../test/results/write_bin.ply", refFile.definitions(), ascii_vertices, ascii_triangles, libply::File::Format::BINARY_LITTLE_ENDIAN);
 
 	Mesh::VertexList readback_ascii_vertices;
 	Mesh::TriangleIndicesList readback_ascii_triangles;
-	readply(L"../test/results/write_ascii.ply", readback_ascii_vertices, readback_ascii_triangles);
+	readply("../test/results/write_ascii.ply", readback_ascii_vertices, readback_ascii_triangles);
 	compare_vertices(ascii_vertices, readback_ascii_vertices);
 	compare_triangles(ascii_triangles, readback_ascii_triangles);
 
 	Mesh::VertexList readback_bin_vertices;
 	Mesh::TriangleIndicesList readback_bin_triangles;
-	readply(L"../test/results/write_bin.ply", readback_bin_vertices, readback_bin_triangles);
+	readply("../test/results/write_bin.ply", readback_bin_vertices, readback_bin_triangles);
 	compare_vertices(bin_vertices, readback_bin_vertices);
 	compare_triangles(bin_triangles, readback_bin_triangles);
 }
