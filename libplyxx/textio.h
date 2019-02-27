@@ -5,6 +5,8 @@
 #include <functional>
 #include <fstream>
 #include <cassert>
+#include <cmath>
+#include <cstring>
 
 namespace textio
 {
@@ -46,7 +48,8 @@ namespace textio
 	class LineReader
 	{
 	public:
-		inline LineReader(const std::wstring& filename, bool textMode = false);
+		template<typename PathString>
+		inline LineReader(const PathString& filename, bool textMode = false);
 
 		// Read next line from input file.
 		// Returned SubString is valid until the next call to getline()
@@ -133,7 +136,7 @@ namespace textio
 	template<typename T>
 	T stor(const std::string& str)
 	{
-		return stof<T>(SubString(str.cbegin(), str.cend()));
+		return stor<T>(SubString(str.cbegin(), str.cend()));
 	}
 
 	// Convert string to unsigned type.
@@ -271,10 +274,11 @@ namespace textio
 		}
 	}
 
-	LineReader::LineReader(const std::wstring& filename, bool textMode)
+	template<typename PathString>
+	LineReader::LineReader(const PathString& filename, bool textMode)
 		: m_workBufSize(1 * 1024 * 1024), m_eof(false), m_workBufFileEndPosition(0)
 	{
-		int mode = std::fstream::in;
+		std::ios_base::openmode mode = std::fstream::in;
 		if (!textMode) { mode |= std::fstream::binary; }
 		m_file.open(filename, mode);
 		if (!m_file.is_open())
@@ -296,7 +300,7 @@ namespace textio
 		if (overlap != 0)
 		{
 			size_t offset = m_workBufSize - overlap;
-			memcpy(bufferFront, bufferFront + offset, overlap);
+			std::memcpy(bufferFront, bufferFront + offset, overlap);
 		}
 		m_file.read(bufferFront + overlap, m_workBufSize - overlap);
 		m_begin = m_workBuf.cbegin();
