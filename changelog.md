@@ -1,3 +1,7 @@
+# v0.5.0 (2019-02-26)
+- Add support for Linux.
+- Requires C++14.
+
 # v0.4.0 (2017-05-01)
 Add support for writing PLY files.
 

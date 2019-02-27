@@ -6,3 +6,4 @@
 /visualstudio/*.vspx
 /visualstudio/*.opendb
 /CMakeFiles
+/build
