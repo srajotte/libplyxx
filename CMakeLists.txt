@@ -20,5 +20,7 @@ add_executable(libplyxx_test ${TEST_SOURCES})
 target_link_libraries(libplyxx_test libplyxx0)
 set_target_properties(libplyxx0 PROPERTIES OUTPUT_NAME "libplyxx" VERSION ${LIBPLYXX_VERSION})
 set_target_properties(libplyxx1 PROPERTIES OUTPUT_NAME "libplyxx" VERSION ${LIBPLYXX_VERSION})
+install(TARGETS libplyxx0 libplyxx1 DESTINATION lib)
+install(FILES libplyxx/libplyxx.h DESTINATION include)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT libplyxx_test)
