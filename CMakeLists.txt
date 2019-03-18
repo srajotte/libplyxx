@@ -4,6 +4,8 @@ project(libplyxx)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(TestBigEndian)
+
 file(GLOB LIB_SOURCES "libplyxx/*.cpp")
 file(GLOB TEST_SOURCES "test/*.cpp")
 
