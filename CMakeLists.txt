@@ -25,4 +25,7 @@ set_target_properties(libplyxx1 PROPERTIES OUTPUT_NAME "libplyxx" VERSION ${LIBP
 install(TARGETS libplyxx0 libplyxx1 DESTINATION lib)
 install(FILES libplyxx/libplyxx.h DESTINATION include)
 
+include_directories(${PROJECT_BINARY_DIR})
+configure_file (config.h.in config.h)
+
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT libplyxx_test)
