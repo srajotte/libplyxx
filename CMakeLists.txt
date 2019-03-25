@@ -26,6 +26,8 @@ install(TARGETS libplyxx0 libplyxx1 DESTINATION lib)
 install(FILES libplyxx/libplyxx.h libplyxx/textio.h DESTINATION include)
 
 include_directories(${PROJECT_BINARY_DIR})
-configure_file (config.h.in config.h)
+configure_file(config.h.in config.h)
+configure_file(test/data/test.ply test.ply COPYONLY)
+configure_file(test/data/test_bin.ply test_bin.ply COPYONLY)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT libplyxx_test)
