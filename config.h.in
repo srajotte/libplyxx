@@ -1,0 +1,5 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+#cmakedefine BIGENDIAN
+#define VERSION "@LIBPLYXX_VERSION@"
+#endif
