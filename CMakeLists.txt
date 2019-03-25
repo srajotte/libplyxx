@@ -23,7 +23,7 @@ target_link_libraries(libplyxx_test libplyxx0)
 set_target_properties(libplyxx0 PROPERTIES OUTPUT_NAME "libplyxx" VERSION ${LIBPLYXX_VERSION})
 set_target_properties(libplyxx1 PROPERTIES OUTPUT_NAME "libplyxx" VERSION ${LIBPLYXX_VERSION})
 install(TARGETS libplyxx0 libplyxx1 DESTINATION lib)
-install(FILES libplyxx/libplyxx.h DESTINATION include)
+install(FILES libplyxx/libplyxx.h libplyxx/textio.h DESTINATION include)
 
 include_directories(${PROJECT_BINARY_DIR})
 configure_file (config.h.in config.h)
